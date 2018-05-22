@@ -1,6 +1,7 @@
 #include "parse_util.h"
 
-#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
 
 char *parse_line(char **text)
 {
@@ -10,7 +11,7 @@ char *parse_line(char **text)
     if (*text == NULL) {
         return 0;
     }
-
+    
     result = *text;
 
     while (**text && (**text != '\r') && (**text != '\n')) {
@@ -35,32 +36,72 @@ char *parse_line(char **text)
     return result;
 }
 
-char *parse_token(char **text)
+static int is_line_empty(char *line)
+{
+    while(line) {
+        if (*line != ' ' && *line != '\t') {
+            return 0;
+        }
+        line++;
+    }
+    return 1;
+}
+
+char *parse_line_skipping_empty_lines(char **text)
+{
+    char * line;
+    while ((line = parse_line(text)) && is_line_empty(line)) {
+    }
+
+    return line;
+}
+
+char *parse_token(char **line)
 {
     char * result;
 
-    if (*text == NULL) {
+    if (*line == NULL) {
         return 0;
     }
     
-    while (**text && (**text == ' ' || **text == '\t')) {
-      (*text)++;
+    while (**line && (**line == ' ' || **line == '\t')) {
+      (*line)++;
     }
 
-    if (!**text) {
+    if (!**line) {
         return 0;
     }
     
-    result = *text;
+    result = *line;
 
-    while (**text && **text != ' ' && **text != '\t') {
-      (*text)++;
+    while (**line && **line != ' ' && **line != '\t') {
+      (*line)++;
     }
     
-    if (**text) {
-        **text = 0;
-	(*text)++;
+    if (**line) {
+        **line = 0;
+	(*line)++;
     }
     
+    return result;
+}
+
+char *parse_token_next_non_empty_line(char **text, char **line)
+{
+    char * token;
+    do {
+        *line = parse_line(text);
+        token = NULL;
+    } while (*line && !(token = parse_token(line)));
+
+    return token;
+}
+
+char *my_strdup(char *s)
+{
+    char *result = (char *) malloc(strlen(s) + 1);
+    if (result != NULL) {
+        strcpy(result, s);
+    }
     return result;
 }

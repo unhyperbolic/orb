@@ -5,11 +5,12 @@
 
 #define LN(ch)   (ch=='u') ? 0 : ((ch=='v') ? 1 : ((ch=='w') ? 2 : 3))
 
-const int vertex_at_faces[4][4] =
+const int vertex_at_faces[4][4];
+/*=
         {{9,2,3,1},
          {3,9,0,2},
          {1,3,9,0},
-         {2,0,1,9}};
+         {2,0,1,9}}; */
 
 typedef struct CassonFormat CassonFormat;
 typedef struct EdgeInfo EdgeInfo;
@@ -18,7 +19,8 @@ typedef struct TetEdgeInfo TetEdgeInfo;
 struct CassonFormat
 {
 	SolutionType	type;
-	bool		vertices_known;
+  //	bool		vertices_known;
+        Boolean         vertices_known;
 	int		num_tet;
 	EdgeInfo	*head;
 };

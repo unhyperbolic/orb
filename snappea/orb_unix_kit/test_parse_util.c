@@ -5,15 +5,6 @@
 #include <stdio.h>
 #include <stddef.h>
 
-char *my_strdup(char *s)
-{
-    char *result = (char *) malloc(strlen(s) + 1);
-    if (result != NULL) {
-        strcpy(result, s);
-    }
-    return result;
-}
-
 int main()
 {
     char *a = my_strdup("Hello World\n\rNext line\n  3  4\n4  5  \n");

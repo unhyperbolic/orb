@@ -14,7 +14,7 @@ int main()
         printf("Line: '%s'\n", l);
 	
 	while ((t = parse_token(&l))) {
-  	    printf("Token: '%s'\n", t);
+  	    printf("           Token: '%s'\n", t);
 	}
     }
   

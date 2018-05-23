@@ -21,7 +21,7 @@ char *parse_line(char **text)
     c = **text;
 
     if (!c) {
-        *text = 0;
+        *text = NULL;
 	return result;
     }
 

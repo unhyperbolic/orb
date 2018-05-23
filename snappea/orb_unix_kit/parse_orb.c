@@ -2,6 +2,8 @@
 
 #include "parse_orb.h"
 
+#include "casson.h"
+
 #include "parse_util.h"
 
 #include <stdlib.h>
@@ -20,38 +22,8 @@
             - freeCassonFormat
        - readDiagram
             - DiagramCanvas::readDiagram (in interface.cpp)
-    	         * seems to follow the plink format (vertices, edges, crossings)
+    	         * seems to be somewhat similar to the plink format (vertices, edges, crossings)
 */
-
-void free_casson(CassonFormat *cf)
-{
-    // void		freeCassonFormat( CassonFormat *cf );
-    EdgeInfo *e1, *e2;
-    TetEdgeInfo *t1, *t2;
-    
-    if (cf == NULL)
-        return;
-    
-    e1 = cf->head;
-    
-    while (e1!=NULL)
-    {
-        e2 = e1->next;
-        t1 = e1->head;
-        
-        while (t1!=NULL)
-        {
-            t2 = t1->next;
-            my_free(t1);
-            t1 = t2;
-        }
-        
-        my_free(e1);
-        e1 = e2;
-    }
-    
-    my_free(cf);
-}
 
 static SolutionType string_to_solution_type(char *s)
 {
@@ -83,7 +55,6 @@ static Boolean fill_casson_from_string_destructive(
         char **file_data)
 {
     int             i;
-    Boolean         ok = FALSE;
     char            *line,
                     *section;
     EdgeInfo        *nei = NULL,
@@ -176,6 +147,8 @@ static Boolean fill_casson_from_string_destructive(
                 return FALSE;
             }
 
+            if (ei->one_vertex > 0 ) ei->one_vertex--;
+
             printf("one_vertex: %d\n", ei->one_vertex);
 
             if (!(section = parse_token(&line))) {
@@ -185,6 +158,8 @@ static Boolean fill_casson_from_string_destructive(
             if (sscanf(section, "%d%c", &(ei->other_vertex), &dummy) != 1) {
                 return FALSE;
             }
+
+            if (ei->other_vertex > 0 ) ei->other_vertex--;
 
             printf("one_vertex: %d\n", ei->other_vertex);
 
@@ -225,7 +200,7 @@ static Boolean fill_casson_from_string_destructive(
                 return FALSE;
             }
 
-            if ('u' <= f1 && f1 <= 'x') {
+            if ('u' <= f2 && f2 <= 'x') {
                 tei->f2 = f2 - 'u';
             } else {
                 return FALSE;
@@ -261,10 +236,6 @@ static Boolean fill_casson_from_string_destructive(
         ei = cf->head;
         while(ei != NULL) {
             printf("line: %p %s\n", line, line);
-
-            if (!line) {
-                return FALSE;
-            }
 
             // Orb skips 1
             if (!(section = parse_token(&line))) {
@@ -322,18 +293,16 @@ static Boolean fill_casson_from_string_destructive(
     if (cf->vertices_known) {
         printf(" Scanning vertices\n");
 
+        /*
         if (!line) {
             return FALSE;
         }
+        */
         line = parse_line_skipping_empty_lines(file_data);
         
         ei = cf->head;
         while(ei != NULL) {
             printf("line: %p %s\n", line, line);
-
-            if (!line) {
-                return FALSE;
-            }
 
             // Orb skips 1
             if (!(section = parse_token(&line))) {
@@ -367,7 +336,7 @@ static Boolean fill_casson_from_string_destructive(
 }
 
 static CassonFormat *read_casson_from_string_destructive(
-    char **file_data)
+        char **file_data)
 {
     // readCassonFormat( QTextStream &ts)
     CassonFormat *cf = NEW_STRUCT(CassonFormat);
@@ -379,8 +348,23 @@ static CassonFormat *read_casson_from_string_destructive(
     return NULL;
 }
 
+static Boolean has_non_whitespace(
+        char *l)
+{
+    while (l) {
+        if (*l != ' ' && *l != '\t' && *l != '\n' && *l != '\r') {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
 static void read_orb_from_string_destructive(
-        char **file_data, char ** name, CassonFormat ** cf)
+        char **file_data,
+        char ** name,
+        CassonFormat ** cf,
+        char **orb_link_projection_data)
 {
     char * l;
 
@@ -397,17 +381,22 @@ static void read_orb_from_string_destructive(
     *name = my_strdup(l);
     
     *cf = read_casson_from_string_destructive(file_data);
+
+    if (*cf && *file_data && has_non_whitespace(*file_data)) {
+        *orb_link_projection_data = my_strdup(*file_data);
+    }
 }
 
 void read_orb_from_string(
         char *file_data,
         char **name,
-        CassonFormat ** cf)
+        CassonFormat ** cf,
+        char **orb_link_projection_data)
 {
     char * copy = my_strdup(file_data);
     char * p = copy;
     
-    read_orb_from_string_destructive(&p, name, cf);
+    read_orb_from_string_destructive(&p, name, cf, orb_link_projection_data);
     
     free(copy);
 }
@@ -415,7 +404,8 @@ void read_orb_from_string(
 void read_orb(
         const char *file_name,
         char **name,
-        CassonFormat ** cf)
+        CassonFormat ** cf,
+        char **orb_link_projection_data)
 {
     // Follows unit_kit/unix_file_io.c
 
@@ -443,7 +433,7 @@ void read_orb(
     }
 
     p = buffer;
-    read_orb_from_string_destructive(&p, name, cf);
+    read_orb_from_string_destructive(&p, name, cf, orb_link_projection_data);
     
     free(buffer);
 }

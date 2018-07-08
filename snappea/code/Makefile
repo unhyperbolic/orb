@@ -4,6 +4,9 @@ CFLAGS= -c -g -Wall -I../headers
 SRCS = ${wildcard *.c}
 OBJS= ${SRCS:%.c=%.o}
 
+../solution_for_snappea_finite_triangulation: ../solution_for_snappea_finite_triangulation.c liborb.a
+	gcc -I../headers ../solution_for_snappea_finite_triangulation.c liborb.a -lm -o../solution_for_snappea_finite_triangulation
+
 lib: liborb.a
 
 liborb.a: ${OBJS}
@@ -16,5 +19,8 @@ liborb.a: ${OBJS}
 depend:
 	@echo making dependency file Makefile.dependencies ...
 	gcc -MM -I../headers *.c > Makefile.dependencies
+
+clean:
+	rm -f liborb.a ../solution_for_snappea_finite_triangulation *.o
 
 include Makefile.dependencies

@@ -1569,7 +1569,7 @@ static double derivative_ij_nn(
 }
 
 
-extern double minor1( GL4RMatrix matrix, int row, int col )
+double minor1( GL4RMatrix matrix, int row, int col )
 {
   double m[3][3], det;
   int i, j, r, c;

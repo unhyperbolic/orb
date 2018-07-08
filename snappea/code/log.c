@@ -138,6 +138,7 @@ static cheb_series lopxmx_cs = {
 
 /*-*-*-*-*-*-*-*-*-*-*-* Functions with Error Codes *-*-*-*-*-*-*-*-*-*-*-*/
 
+#if 0
 #ifndef HIDE_INLINE_STATIC
 int
 gsl_sf_log_e(const double x, gsl_sf_result * result)
@@ -169,6 +170,7 @@ gsl_sf_log_abs_e(const double x, gsl_sf_result * result)
     return GSL_SUCCESS;
   }
 }
+#endif
 #endif
 
 int

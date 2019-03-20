@@ -19,16 +19,24 @@ int main(int argc, char ** argv)
 
     if (argc != 2) {
         printf("Usage: solution_for_snappea_finite_triangulation TRIANGULATION.tri\n");
-        exit(1);
+        exit(16);
     }
 
     trig = get_triangulation( argv[1] );
     if (!trig) {
         fprintf(stderr, "Not a valid triangulation file\n");
-        exit(1);
+        exit(17);
     }
-    
-    printf("Solution type: %d\n", find_structure(trig, FALSE));
+
+    // There seems to be a bug in Orb: find_structure returns 0
+    // (corresponding to SolutionType not_attempted) even if the
+    // solution is geometric.
+    // We thus use trig->solution_type[complete] instead.
+    find_structure(trig, FALSE);
+
+    int solution_type = trig->solution_type[complete];
+
+    printf("Solution type: %d\n", solution_type);
 
     printf("Volume: %lf\n", my_volume(trig, &ok));
     printf("Vol ok: %d\n", ok);
@@ -42,7 +50,7 @@ int main(int argc, char ** argv)
 
     if (!o) {
         fprintf(stderr, "Could not open file for writing.");
-        exit(1);
+        exit(18);
     }
 
     fprintf(o, "[\n");
@@ -64,5 +72,18 @@ int main(int argc, char ** argv)
 
     fclose(o);
 
-    return 0;
+    // Some slight remapping of solution_type to
+    // exit code.
+    // The convention for exit codes is that 0 indicates
+    // success, but unfortunately, the SolutionType
+    // indicatign success is geometric_solution having
+    // value 1.
+    switch(solution_type) {
+    case not_attempted:
+        return 15;
+    case geometric_solution:
+        return 0;
+    default:
+        return solution_type;
+    }
 }

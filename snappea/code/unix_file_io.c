@@ -141,14 +141,14 @@ static TriangulationData *ReadNewFileFormat(
 	/*
 	 *	Allocate and read the name of the manifold.
 	 */
-	theTriangulationData->name = (char *) malloc(100 * sizeof(char));
+	theTriangulationData->name = (char *) malloc(1000 * sizeof(char));
 	if (theTriangulationData->name == NULL)
 		uFatalError("ReadNewFileFormat", "unix file io");
 	/*
 	 *	The name will be on the first nonempty line.
 	 */
 
-	my_fgets(theTriangulationData->name, 100, fp);
+	my_fgets(theTriangulationData->name, 1000, fp);
 
 	/*
 	 *	Read the filled solution type.

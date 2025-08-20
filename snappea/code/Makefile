@@ -18,3 +18,6 @@ depend:
 	gcc -MM -I../headers *.c > Makefile.dependencies
 
 include Makefile.dependencies
+
+clean:
+	rm liborb.a ${OBJS}

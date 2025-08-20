@@ -64,7 +64,7 @@ complex<double> point_to_complex( QPoint p )
 
 QPoint time_to_point( Edge *edge, double t )
 {
-    return (1 - t)*edge->vertex[begin]->position + t*edge->vertex[end]->position;
+    return (1 - t)*edge->vertex[begin_]->position + t*edge->vertex[end_]->position;
 }
 
 bool ed_more( EndData *ed1, EndData *ed2 )

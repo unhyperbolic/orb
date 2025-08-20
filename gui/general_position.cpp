@@ -48,7 +48,7 @@ bool DiagramCanvas::completed_edge_general_position( Edge *edge, int *vertex_ind
 
     if ( edgeList.size() == 0 ) return TRUE;
 
-    if (proximity(edge->vertex[begin]->position, edge->vertex[end]->position))
+    if (proximity(edge->vertex[begin_]->position, edge->vertex[end_]->position))
           return FALSE;
 
     joinState = no_join;
@@ -57,7 +57,7 @@ bool DiagramCanvas::completed_edge_general_position( Edge *edge, int *vertex_ind
      *  First check whether edge->end is near to some vertex
      */
 
-    for ( i=0; i<vertexList.size(); ++i ) if ( proximity( edge->vertex[end]->position, vertexList[i]->position ) )
+    for ( i=0; i<vertexList.size(); ++i ) if ( proximity( edge->vertex[end_]->position, vertexList[i]->position ) )
     { 
          joinState = join;
          *vertex_index = i;
@@ -72,9 +72,9 @@ bool DiagramCanvas::completed_edge_general_position( Edge *edge, int *vertex_ind
     if (joinState == join)
     for(i=0;i<vertexList[*vertex_index]->incidentEndData.size();i++)
     {
-          int type = (vertexList[*vertex_index]->incidentEndData[i]->type == begin) ? end : begin;
+          int type = (vertexList[*vertex_index]->incidentEndData[i]->type == begin_) ? end_ : begin_;
           
-          if (vertexList[*vertex_index]->incidentEndData[i]->edge->vertex[type] == edge->vertex[begin] )
+          if (vertexList[*vertex_index]->incidentEndData[i]->edge->vertex[type] == edge->vertex[begin_] )
                  return FALSE;
     }
 
@@ -84,14 +84,14 @@ bool DiagramCanvas::completed_edge_general_position( Edge *edge, int *vertex_ind
 
 
     for ( i=0; i<edgeList.size(); ++i )
-    if ( proximity( edge->vertex[end]->position, edgeList[i] ) )
+    if ( proximity( edge->vertex[end_]->position, edgeList[i] ) )
     {
         if (joinState == no_join &&
-             (edge->vertex[begin] != edgeList[i]->vertex[begin]
-             || edge->vertex[begin] != edgeList[i]->vertex[end] ))
+             (edge->vertex[begin_] != edgeList[i]->vertex[begin_]
+             || edge->vertex[begin_] != edgeList[i]->vertex[end_] ))
                 return FALSE;
-        else if ( edgeList[i]->vertex[end] != vertexList[*vertex_index]
-                   && edgeList[i]->vertex[begin] != vertexList[*vertex_index])
+        else if ( edgeList[i]->vertex[end_] != vertexList[*vertex_index]
+                   && edgeList[i]->vertex[begin_] != vertexList[*vertex_index])
                 return FALSE;
     }
 
@@ -101,7 +101,7 @@ bool DiagramCanvas::completed_edge_general_position( Edge *edge, int *vertex_ind
      */
     for ( i=0; i<vertexList.size(); ++i )
     if ( i != *vertex_index
-           && edge->vertex[begin] != vertexList[i]
+           && edge->vertex[begin_] != vertexList[i]
            && proximity( vertexList[i]->position, edge ))
         return FALSE;
     /*
@@ -117,7 +117,7 @@ bool DiagramCanvas::completed_edge_general_position( Edge *edge, int *vertex_ind
     vector<double> cp;
     double t1, t2;
     QPoint crossing_point;
-    double len = abs(point_to_complex( edge->vertex[end]->position - edge->vertex[begin]->position));
+    double len = abs(point_to_complex( edge->vertex[end_]->position - edge->vertex[begin_]->position));
 
     for ( i=0; i<edgeList.size(); ++i ) if ( edge_intersect( edge, edgeList[i], &t1, &t2, &crossing_point ) )
     {
@@ -162,8 +162,8 @@ bool DiagramCanvas::dragged_vertex_general_position()
 
     for(i=0;i<edgeList.size();i++)
     if (proximity(draggedVertex->position,edgeList[i])
-        && edgeList[i]->vertex[begin] != draggedVertex
-        && edgeList[i]->vertex[end] != draggedVertex )
+        && edgeList[i]->vertex[begin_] != draggedVertex
+        && edgeList[i]->vertex[end_] != draggedVertex )
         return FALSE;
 
     for(ed_it = draggedVertex->incidentEndData.begin();
@@ -172,8 +172,8 @@ bool DiagramCanvas::dragged_vertex_general_position()
     {
         for(i=0;i<vertexList.size();i++)
         if (proximity(vertexList[i]->position,(*ed_it)->edge)
-            && (*ed_it)->edge->vertex[begin] != draggedVertex
-            && (*ed_it)->edge->vertex[end] != draggedVertex )
+            && (*ed_it)->edge->vertex[begin_] != draggedVertex
+            && (*ed_it)->edge->vertex[end_] != draggedVertex )
             return FALSE;
 
         for(i=0;i<crossingList.size();i++)
@@ -190,8 +190,8 @@ bool DiagramCanvas::dragged_vertex_general_position()
           ed_it != draggedVertex->incidentEndData.end();
           ed_it++ )
     {
-        len = abs( point_to_complex( (*ed_it)->edge->vertex[end]->position
-                    - (*ed_it)->edge->vertex[begin]->position));
+        len = abs( point_to_complex( (*ed_it)->edge->vertex[end_]->position
+                    - (*ed_it)->edge->vertex[begin_]->position));
 
         for ( i=0; i<edgeList.size(); ++i ) if ( edgeList[i] != (*ed_it)->edge &&
             edge_intersect( (*ed_it)->edge, edgeList[i], &t1, &t2, &crossing_point ) )
@@ -248,8 +248,8 @@ bool DiagramCanvas::dragged_vertex_general_position()
 
 bool DiagramCanvas::proximity( QPoint point, Edge *edge )
 {
-    double p = abs( point_to_complex( point - edge->vertex[begin]->position ) );
-    double q = abs( point_to_complex( point - edge->vertex[end]->position ) );
+    double p = abs( point_to_complex( point - edge->vertex[begin_]->position ) );
+    double q = abs( point_to_complex( point - edge->vertex[end_]->position ) );
 
     double r = edge->distance_from_edge( point );
     double t = edge->projection_to_edge( point );
@@ -277,10 +277,10 @@ bool DiagramCanvas::edge_intersect( Edge *edge1, Edge *edge2, double *t1, double
 {
     complex<double> z1, z2, z3, z4;
 
-    z1 = point_to_complex( edge1->vertex[begin]->position );
-    z2 = point_to_complex( edge1->vertex[end]->position );
-    z3 = point_to_complex( edge2->vertex[begin]->position );
-    z4 = point_to_complex( edge2->vertex[end]->position );
+    z1 = point_to_complex( edge1->vertex[begin_]->position );
+    z2 = point_to_complex( edge1->vertex[end_]->position );
+    z3 = point_to_complex( edge2->vertex[begin_]->position );
+    z4 = point_to_complex( edge2->vertex[end_]->position );
 
     if ( z1 == z2 || z3 == z4 ) return FALSE;
 

@@ -24,7 +24,7 @@ struct Crossing;
 
 
 enum JoinState  { no_join, join };
-enum EndType  {begin = 0, end = 1};
+enum EndType  {begin_ = 0, end_ = 1};
 enum EdgeType {singular = 0, drilled = 1};
 
 #define	THICK 3

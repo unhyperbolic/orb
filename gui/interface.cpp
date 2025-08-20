@@ -98,7 +98,7 @@ void DiagramCanvas::clearDiagram()
     if (edge_creation_in_progress)
     {
          paint( currentEdge, TRUE );
-         currentEdge->vertex[end]->~Vertex();
+         currentEdge->vertex[end_]->~Vertex();
          currentEdge->~Edge();
          edge_creation_in_progress = FALSE;
     }
@@ -150,8 +150,8 @@ void DiagramCanvas::saveDiagram( QTextStream &stream )
     {
           edgeList[i]->edge_id = i;
 	  stream << i << "\t";
-	  stream << edgeList[i]->vertex[begin]->vertex_id << "\t";
-	  stream << edgeList[i]->vertex[end]->vertex_id << "\t";
+	  stream << edgeList[i]->vertex[begin_]->vertex_id << "\t";
+	  stream << edgeList[i]->vertex[end_]->vertex_id << "\t";
 	  stream << ((edgeList[i]->edge_type == drilled) ? 1 : 0) << "\n";
     }
 
@@ -245,8 +245,8 @@ void DiagramCanvas::deleteSelectedEdges()
     while ( edge_it < edgeList.end() )
     if ((*edge_it)->selected)
     {
-        vertex1 = (*edge_it)->vertex[begin];
-        vertex2 = (*edge_it)->vertex[end];
+        vertex1 = (*edge_it)->vertex[begin_];
+        vertex2 = (*edge_it)->vertex[end_];
 
         paint( *edge_it, TRUE );
 
@@ -350,8 +350,8 @@ void DiagramCanvas::deleteArc( int a )
     while ( edge_it < edgeList.end() )
     if ((*edge_it)->arc_id == a && (*edge_it)->edge_type == singular )
     {
-        vertex1 = (*edge_it)->vertex[begin];
-        vertex2 = (*edge_it)->vertex[end];
+        vertex1 = (*edge_it)->vertex[begin_];
+        vertex2 = (*edge_it)->vertex[end_];
 
         paint( *edge_it, TRUE );
 
@@ -504,8 +504,8 @@ void DiagramCanvas::reassign_arcs( int a )
                                 		for(k=0;k<edgeList[j]->vertex[m]->incidentEndData.size(); k++ )
                                 		if (edgeList[j]->vertex[m]->incidentEndData[k]->edge == edgeList[j] )
                                 			edgeList[j]->vertex[m]->incidentEndData[k]->type =
-                                				(edgeList[j]->vertex[m]->incidentEndData[k]->type==begin) ?
-										end : begin;
+                                				(edgeList[j]->vertex[m]->incidentEndData[k]->type==begin_) ?
+										end_ : begin_;
 
 					vector<Crossing *>::iterator c_it;
 					c_it = crossingList.begin();
@@ -591,8 +591,8 @@ void DiagramCanvas::reassign_links( bool arc_was_drilled )
 			if (	edgeList[j]->edge_type == singular &&
 				edgeList[j]->arc_id == i )
 			{
-				if (	edgeList[j]->vertex[begin]->incidentEndData.size() != 2 ||
-					edgeList[j]->vertex[end]->incidentEndData.size() != 2 )
+				if (	edgeList[j]->vertex[begin_]->incidentEndData.size() != 2 ||
+					edgeList[j]->vertex[end_]->incidentEndData.size() != 2 )
 					arc_is_loop = FALSE;
 			}
 
@@ -601,11 +601,11 @@ void DiagramCanvas::reassign_links( bool arc_was_drilled )
 			if (	edgeList[j]->edge_type == singular &&
 				edgeList[j]->arc_id == i )
 			{
-				if (	edgeList[j]->vertex[begin]->incidentEndData.size() == 2 &&
-					edgeList[j]->vertex[begin]->link_id > -1 )
+				if (	edgeList[j]->vertex[begin_]->incidentEndData.size() == 2 &&
+					edgeList[j]->vertex[begin_]->link_id > -1 )
 				{
-					dead_id = edgeList[j]->vertex[begin]->link_id;
-					edgeList[j]->vertex[begin]->link_id = -1;
+					dead_id = edgeList[j]->vertex[begin_]->link_id;
+					edgeList[j]->vertex[begin_]->link_id = -1;
 
 					for(k = 0; k < vertexList.size();k++)
 					if (	vertexList[k]->link_id > dead_id )
@@ -617,11 +617,11 @@ void DiagramCanvas::reassign_links( bool arc_was_drilled )
 						edgeList[k]->link_id--;
 				}
 
-				if (	edgeList[j]->vertex[end]->incidentEndData.size() == 2 &&
-					edgeList[j]->vertex[end]->link_id > -1 )
+				if (	edgeList[j]->vertex[end_]->incidentEndData.size() == 2 &&
+					edgeList[j]->vertex[end_]->link_id > -1 )
 				{
-                                        dead_id = edgeList[j]->vertex[end]->link_id;
-                                        edgeList[j]->vertex[end]->link_id = -1;
+                                        dead_id = edgeList[j]->vertex[end_]->link_id;
+                                        edgeList[j]->vertex[end_]->link_id = -1;
 
                                         for(k = 0; k < vertexList.size();k++)
                                         if (    vertexList[k]->link_id > dead_id )
@@ -688,10 +688,10 @@ void DiagramCanvas::getCrossingSigns()
     {
         Crossing *c = crossingList[i];
 
-        z1 = point_to_complex( c->over->vertex[begin]->position );
-        z2 = point_to_complex( c->over->vertex[end]->position );
-        z3 = point_to_complex( c->under->vertex[begin]->position );
-        z4 = point_to_complex( c->under->vertex[end]->position );
+        z1 = point_to_complex( c->over->vertex[begin_]->position );
+        z2 = point_to_complex( c->over->vertex[end_]->position );
+        z3 = point_to_complex( c->under->vertex[begin_]->position );
+        z4 = point_to_complex( c->under->vertex[end_]->position );
 
         w = ( z3 - z1 ) / ( z2 - z1 );
 
@@ -710,12 +710,12 @@ void DiagramCanvas::ed_angles()
          ed_it != vertexList[i]->incidentEndData.end();
          ed_it++ )
     { 
-        if ((*ed_it)->type == begin)
-             z = point_to_complex( (*ed_it)->edge->vertex[end]->position
-                          - (*ed_it)->edge->vertex[begin]->position );
+        if ((*ed_it)->type == begin_)
+             z = point_to_complex( (*ed_it)->edge->vertex[end_]->position
+                          - (*ed_it)->edge->vertex[begin_]->position );
         else
-             z = point_to_complex( (*ed_it)->edge->vertex[begin]->position
-                          - (*ed_it)->edge->vertex[end]->position );
+             z = point_to_complex( (*ed_it)->edge->vertex[begin_]->position
+                          - (*ed_it)->edge->vertex[end_]->position );
 
         (*ed_it)->angle = -arg(z);/* minus???? */
     }
@@ -792,12 +792,12 @@ Triangulation *DiagramCanvas::outputTriangulation()
 
                 meeting->component[j] = vertexList[i]->link_id;
 
-                if (ed->type == begin)
+                if (ed->type == begin_)
                 {
                       if (e->crossings.empty())
                       {
-                              meeting->strand[j] = get_strand(e, e->vertex[end]);
-                              meeting->neighbor[j] = e->vertex[end]->vertex_id;
+                              meeting->strand[j] = get_strand(e, e->vertex[end_]);
+                              meeting->neighbor[j] = e->vertex[end_]->vertex_id;
                       }
                       else
                       {
@@ -814,8 +814,8 @@ Triangulation *DiagramCanvas::outputTriangulation()
                 {
                      if (e->crossings.empty())
                       {
-                              meeting->strand[j] = get_strand(e, e->vertex[begin]);
-                              meeting->neighbor[j] = e->vertex[begin]->vertex_id;
+                              meeting->strand[j] = get_strand(e, e->vertex[begin_]);
+                              meeting->neighbor[j] = e->vertex[begin_]->vertex_id;
                       }
                       else
                       {
@@ -857,8 +857,8 @@ Triangulation *DiagramCanvas::outputTriangulation()
 
           if ( (other = get_prev_crossing( e, c)) == NULL)
           {
-                meeting->strand[0] = get_strand( e, e->vertex[begin] );
-                meeting->neighbor[0] = e->vertex[begin]->vertex_id;
+                meeting->strand[0] = get_strand( e, e->vertex[begin_] );
+                meeting->neighbor[0] = e->vertex[begin_]->vertex_id;
           }
           else
           {
@@ -868,8 +868,8 @@ Triangulation *DiagramCanvas::outputTriangulation()
 
           if ( (other = get_next_crossing( e, c)) == NULL)
           {
-                meeting->strand[2] = get_strand( e, e->vertex[end] );
-                meeting->neighbor[2] = e->vertex[end]->vertex_id;
+                meeting->strand[2] = get_strand( e, e->vertex[end_] );
+                meeting->neighbor[2] = e->vertex[end_]->vertex_id;
           }
           else
           {
@@ -884,8 +884,8 @@ Triangulation *DiagramCanvas::outputTriangulation()
 
           if ( (other = get_prev_crossing( e, c)) == NULL)
           {
-                meeting->strand[1] = get_strand( e, e->vertex[begin] );
-                meeting->neighbor[1] = e->vertex[begin]->vertex_id;
+                meeting->strand[1] = get_strand( e, e->vertex[begin_] );
+                meeting->neighbor[1] = e->vertex[begin_]->vertex_id;
           }
           else
           {
@@ -895,8 +895,8 @@ Triangulation *DiagramCanvas::outputTriangulation()
 
           if ( (other = get_next_crossing( e, c)) == NULL)
           {
-                meeting->strand[3] = get_strand( e, e->vertex[end] );
-                meeting->neighbor[3] = e->vertex[end]->vertex_id;
+                meeting->strand[3] = get_strand( e, e->vertex[end_] );
+                meeting->neighbor[3] = e->vertex[end_]->vertex_id;
           }
           else
           {
@@ -1111,7 +1111,7 @@ void DiagramCanvas::assign_arcs()
                                                 for(int k=0;k<e1->vertex[j]->incidentEndData.size(); k++ )
                                                 if (e1->vertex[j]->incidentEndData[k]->edge == e1 )
                                                         e1->vertex[j]->incidentEndData[k]->type =
-                                                                (e1->vertex[j]->incidentEndData[k]->type==begin) ? end : begin;
+                                                                (e1->vertex[j]->incidentEndData[k]->type==begin_) ? end_ : begin_;
 
 						vector<Crossing *>::iterator c_it;
 						c_it = crossingList.begin();
@@ -1302,7 +1302,7 @@ void DiagramCanvas::assign_cuffs()
 
 			while ( TRUE )
 			{
-				type = (type == begin) ? end : begin;
+				type = (type == begin_) ? end_ : begin_;
 
 				Vertex *v = e->vertex[type];
 

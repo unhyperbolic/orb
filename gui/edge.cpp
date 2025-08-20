@@ -27,15 +27,15 @@ Vertex::~Vertex()
 
 Edge::Edge( Vertex *vertex1, Vertex *vertex2 )
 {
-    vertex[begin] = vertex1;
-    vertex[end] = vertex2;
+    vertex[begin_] = vertex1;
+    vertex[end_] = vertex2;
 
     cuff_id = -1;
     thickness = THIN;
     selected = FALSE;
 
-    EndData *ed1 = new EndData( this, begin );
-    EndData *ed2 = new EndData( this, end );
+    EndData *ed1 = new EndData( this, begin_ );
+    EndData *ed2 = new EndData( this, end_ );
 
     vertex1->incidentEndData.insert( vertex1->incidentEndData.end(), ed1 );
 
@@ -50,9 +50,9 @@ Edge::~Edge()
 
 void Edge::compute_equation_coefficients()
 {
-    a = vertex[end]->position.y() - vertex[begin]->position.y();
-    b = vertex[begin]->position.x() - vertex[end]->position.x();
-    c = -a*vertex[begin]->position.x() -  b*vertex[begin]->position.y();
+    a = vertex[end_]->position.y() - vertex[begin_]->position.y();
+    b = vertex[begin_]->position.x() - vertex[end_]->position.x();
+    c = -a*vertex[begin_]->position.x() -  b*vertex[begin_]->position.y();
 }
 
 
@@ -65,8 +65,8 @@ double Edge::distance_from_edge( QPoint point )
 
     if ( a == 0 && b == 0 )
     {
-        double u = (double) vertex[begin]->position.x();
-        double v = (double) vertex[begin]->position.y();
+        double u = (double) vertex[begin_]->position.x();
+        double v = (double) vertex[begin_]->position.y();
 
         return sqrt( (x0-u)*(x0-u) + (y0-v)*(y0-v) );
     }
@@ -87,10 +87,10 @@ double Edge::projection_to_edge( QPoint point )
     double x = ( b*b*x0 - a*b*y0 - a*c ) / ( a*a + b*b );
     double y = ( -a*b*x0 + a*a*y0 - b*c ) / ( a*a + b*b );
 
-    if ( abs((double) (vertex[begin]->position.x() - vertex[end]->position.x()) ) >= 5 )
-        return ( x - vertex[begin]->position.x() ) / ( vertex[end]->position.x() - vertex[begin]->position.x() );
+    if ( abs((double) (vertex[begin_]->position.x() - vertex[end_]->position.x()) ) >= 5 )
+        return ( x - vertex[begin_]->position.x() ) / ( vertex[end_]->position.x() - vertex[begin_]->position.x() );
     else
-        return ( y - vertex[begin]->position.y() ) / ( vertex[end]->position.y() - vertex[begin]->position.y() );
+        return ( y - vertex[begin_]->position.y() ) / ( vertex[end_]->position.y() - vertex[begin_]->position.y() );
 }
 
 

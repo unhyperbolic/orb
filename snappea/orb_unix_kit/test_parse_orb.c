@@ -15,11 +15,11 @@ int main()
     read_orb("example.orb", &name, &casson, &orb_link_projection_data);
 
     if (casson) {
-        printf("Got it\n");
+        printf("Status: Got it\n");
     }
 
     if (name) {
-        printf("Name: %s\n", name);
+        printf("Status: Name: %s\n", name);
     }
 
     if (orb_link_projection_data) {
@@ -27,15 +27,15 @@ int main()
     }
 
     if (!verify_casson(casson)) {
-        printf("verify_casson failed\n");
+        printf("Status: verify_casson failed\n");
         return 1;
     }
 
-    printf("verify_casson passed\n");
+    printf("Status: verify_casson passed\n");
 
     trig = casson_to_triangulation(casson);
 
-    printf("got trig\n");
+    printf("Status: got trig\n");
 
     printf("Solution type: %d\n", find_structure(trig, FALSE));
 

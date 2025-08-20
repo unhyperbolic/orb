@@ -23,6 +23,9 @@
        - readDiagram
             - DiagramCanvas::readDiagram (in interface.cpp)
     	         * seems to be somewhat similar to the plink format (vertices, edges, crossings)
+		 * EndData, Edge, Vertex, Crossing in diagram_canvas.h
+	         * DiagramCanvas::outputTriangulation creates a Graph
+
 */
 
 static SolutionType string_to_solution_type(char *s)

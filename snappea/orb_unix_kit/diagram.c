@@ -20,7 +20,7 @@ void initialize_diagram(Diagram * diagram)
 
 void initialize_diagram_vertex(DiagramVertex *vertex)
 {
-    vertex->vertex_id = -1;
+    vertex->vertex_id = 0;
     vertex->link_id = -1;
     vertex->num_incident_end_data = 0;
     vertex->incident_end_data = NULL;
@@ -112,7 +112,7 @@ void assign_diagram_arcs(Diagram * diagram)
 
     {
 	DiagramEdge * edge = diagram->edges[0];
-	queue[queue_begin++] = edge;
+	queue[queue_end++] = edge;
 	visited[0] = TRUE;
 	drilled_arc = edge->type == diagramDrilled;
 	if (!drilled_arc)
@@ -184,7 +184,7 @@ void assign_diagram_arcs(Diagram * diagram)
 
 	    DiagramEdge * edge = diagram->edges[i];
 		
-	    queue[queue_begin++] = edge;
+	    queue[queue_end++] = edge;
 	    visited[edge->edge_id] = TRUE;
 		
 	    drilled_arc = edge->type == diagramDrilled;
@@ -218,11 +218,11 @@ void assign_diagram_links(Diagram * diagram)
 	DiagramEdge * edge = diagram->edges[i];
 	edge->edge_id = i;
 	edge->link_id = -2;
-	visited[i] = edge->type == diagramDrilled;
+	visited[i] = edge->type != diagramDrilled;
 
 	if (queue_begin == queue_end && !visited[i])
 	{
-	    queue[queue_begin++] = edge;
+	    queue[queue_end++] = edge;
 	    visited[i] = TRUE;
 	    edge->link_id = diagram->num_links;
 	}

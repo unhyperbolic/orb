@@ -443,6 +443,7 @@ static Diagram *read_diagram_from_string_destructive(
     }
 
     assign_diagram_arcs(diagram);
+    assign_diagram_links(diagram);
     
     free_diagram(diagram);
     return NULL;

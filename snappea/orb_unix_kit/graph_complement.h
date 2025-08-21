@@ -57,6 +57,8 @@ struct GraphMeeting
  	int *neighbor;  /* Following strand i out the the meeting takes you to the meeting indexed neighbor[i] */
 };
 
+Triangulation    *triangulate_graph_complement( Graph *gamma, Boolean remove_vertices );
+    
 #ifdef __cplusplus
 }
 #endif 

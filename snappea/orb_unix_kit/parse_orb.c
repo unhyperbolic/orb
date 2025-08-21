@@ -81,11 +81,11 @@ static Boolean fill_casson_from_string_destructive(
         if (!(section = parse_token(&line))) {
             return FALSE;
         }
-        
+
         // Set cf->type based on section
         // see branches at 712
         cf->type = string_to_solution_type(section);
-        
+
         if (!(section = parse_token_next_non_empty_line(file_data, &line))) {
             return FALSE;
         }
@@ -93,7 +93,7 @@ static Boolean fill_casson_from_string_destructive(
 
     if (strcmp(section, "vertices_known")  == 0) {
         cf->vertices_known = TRUE;
-        
+
         if (!(section = parse_token_next_non_empty_line(file_data, &line))) {
             return FALSE;
         }
@@ -111,7 +111,7 @@ static Boolean fill_casson_from_string_destructive(
 
         ei = nei;
 
-        
+
         if (sscanf(section, "%d%c", &(ei->index), &dummy) != 1) {
             return FALSE;
         }
@@ -124,7 +124,7 @@ static Boolean fill_casson_from_string_destructive(
         if (sscanf(section, "%d%c", &(ei->singular_index), &dummy) != 1) {
             return FALSE;
         }
-        
+
         (ei->singular_index)--;
 
         if (!(section = parse_token(&line))) {
@@ -180,13 +180,13 @@ static Boolean fill_casson_from_string_destructive(
                        &tei->tet_index, &f1, &f2, &dummy) != 3) {
                 return FALSE;
             }
-            
+
             if (tei->tet_index > cf->num_tet) {
                 cf->num_tet = tei->tet_index;
             }
- 
+
             (tei->tet_index)--;
-            
+
             if ('u' <= f1 && f1 <= 'x') {
                 tei->f1 = f1 - 'u';
             } else {
@@ -200,7 +200,7 @@ static Boolean fill_casson_from_string_destructive(
             }
 
         } while ((section = parse_token(&line)));
-        
+
     } while ((line = parse_line(file_data)) && (section = parse_token(&line)));
 
     if (cf->type != not_attempted) {
@@ -210,9 +210,9 @@ static Boolean fill_casson_from_string_destructive(
         // peripheral curves.
         // The peripheral curves are always there
         // (every call to saveTriangulation says so).
-  
+
         line = parse_line_skipping_empty_lines(file_data);
-      
+
 //        if (!( section = parse_token_next_non_empty_line(file_data, &line))) {
 //            return FALSE;
 //        }
@@ -255,7 +255,7 @@ static Boolean fill_casson_from_string_destructive(
                 if (!(section = parse_token(&line))) {
                     return FALSE;
                 }
-                
+
                 if (sscanf(section, "%lf%c", &(tei->dihedral_angle), &dummy) != 1) {
                     return FALSE;
                 }
@@ -275,7 +275,7 @@ static Boolean fill_casson_from_string_destructive(
         }
         */
         line = parse_line_skipping_empty_lines(file_data);
-        
+
         ei = cf->head;
         while(ei != NULL) {
             // Orb skips 1
@@ -289,7 +289,7 @@ static Boolean fill_casson_from_string_destructive(
                     if (!(section = parse_token(&line))) {
                         return FALSE;
                     }
-                    
+
                     if (sscanf(section, "%d%s", &(tei->curves[i]), &dummy) != 1) {
                         return FALSE;
                     }
@@ -315,7 +315,7 @@ static CassonFormat *read_casson_from_string_destructive(
     if (fill_casson_from_string_destructive(cf, file_data)) {
         return cf;
     }
-    
+
     free_casson(cf);
     return NULL;
 }
@@ -362,6 +362,7 @@ static Boolean fill_diagram_from_string_destructive(
 	 diagram->num_edges < num_edges;
 	 diagram->num_edges++) {
 	diagram->edges[diagram->num_edges] = NEW_STRUCT( DiagramEdge );
+	initialize_diagram_edge(diagram->edges[diagram->num_edges]);
 
 	if (sscanf(file_data,
 		   "%d%d%d%d%n",
@@ -393,7 +394,7 @@ static Boolean fill_diagram_from_string_destructive(
 
 	add_end_data_to_vertex(begin_data, diagram->vertices[id0]);
 	add_end_data_to_vertex(end_data, diagram->vertices[id1]);
-	
+
 	file_data += chars_consumed;
     }
 
@@ -426,7 +427,7 @@ static Boolean fill_diagram_from_string_destructive(
 	    diagram->edges[id0];
 	diagram->crossings[diagram->num_crossings]->under =
 	    diagram->edges[id1];
-	
+
 	file_data += chars_consumed;
     }
 
@@ -441,7 +442,7 @@ static Diagram *read_diagram_from_string_destructive(
     if (fill_diagram_from_string_destructive(diagram, file_data)) {
 	assign_diagram_arcs(diagram);
 	assign_diagram_links(diagram);
-    
+
 	return diagram;
     }
 
@@ -473,14 +474,14 @@ static void read_orb_from_string_destructive(
     if (!l || strcmp(l, "% orb") != 0) {
         return;
     }
-    
+
     l = parse_line(file_data);
     if (!l) {
         return;
     }
 
     *name = my_strdup(l);
-    
+
     *cf = read_casson_from_string_destructive(file_data);
 
     if (*cf && *file_data && has_non_whitespace(*file_data)) {
@@ -497,9 +498,9 @@ void read_orb_from_string(
 {
     char * copy = my_strdup(file_data);
     char * p = copy;
-    
+
     read_orb_from_string_destructive(&p, name, cf, diagram);
-    
+
     free(copy);
 }
 
@@ -536,6 +537,6 @@ void read_orb(
 
     p = buffer;
     read_orb_from_string_destructive(&p, name, cf, diagram);
-    
+
     free(buffer);
 }

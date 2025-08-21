@@ -30,45 +30,54 @@ void initialize_diagram_vertex(DiagramVertex *vertex)
 static void free_diagram_vertex(DiagramVertex *vertex)
 {
     int i;
-    
+
     if (!vertex) {
 	return;
     }
 
-    if (vertex->incident_end_data) {
-	for (i = 0; i < vertex->num_incident_end_data; ++i) {
+    if (vertex->incident_end_data)
+    {
+	for (i = 0; i < vertex->num_incident_end_data; ++i)
+	{
 	    my_free(vertex->incident_end_data[i]);
 	}
 	my_free(vertex->incident_end_data);
     }
-    
+
     my_free(vertex);
 }
 
 void free_diagram(Diagram *diagram)
 {
     int i;
-    
-    if (!diagram) {
+
+    if (!diagram)
+    {
 	return;
     }
 
-    if (diagram->vertices) {
-	for (i = 0; i < diagram->num_vertices; ++i) {
+    if (diagram->vertices)
+    {
+	for (i = 0; i < diagram->num_vertices; ++i)
+	{
 	    free_diagram_vertex(diagram->vertices[i]);
 	}
 	my_free(diagram->vertices);
     }
 
-    if (diagram->edges) {
-	for (i = 0; i < diagram->num_edges; ++i) {
+    if (diagram->edges)
+    {
+	for (i = 0; i < diagram->num_edges; ++i)
+	{
 	    my_free(diagram->edges[i]);
 	}
 	my_free(diagram->edges);
     }
 
-    if (diagram->crossings) {
-	for (i = 0; i < diagram->num_crossings; ++i) {
+    if (diagram->crossings)
+    {
+	for (i = 0; i < diagram->num_crossings; ++i)
+	{
 	    my_free(diagram->crossings[i]);
 	}
 	my_free(diagram->crossings);
@@ -77,27 +86,53 @@ void free_diagram(Diagram *diagram)
     my_free(diagram);
 }
 
+void initialize_diagram_edge(DiagramEdge * edge)
+{
+    edge->vertex[0] = NULL;
+    edge->vertex[1] = NULL;
+    edge->num_crossings = 0;
+    edge->crossings = NULL;
+    edge->arc_id = -1;
+    edge->link_id = -1;
+    edge->edge_id = -1;
+    edge->type = diagramBegin;
+}
+
 void add_end_data_to_vertex(DiagramEndData * data, DiagramVertex * vertex)
 {
     DiagramEndData ** new_incident_end_data =
 	NEW_ARRAY(vertex->num_incident_end_data + 1, DiagramEndData*);
-    for (int i = 0; i < vertex->num_incident_end_data; i++) {
+    for (int i = 0; i < vertex->num_incident_end_data; i++)
+    {
 	new_incident_end_data[i] = vertex->incident_end_data[i];
     }
     new_incident_end_data[vertex->num_incident_end_data++] = data;
-    my_free(vertex->incident_end_data);	
+    my_free(vertex->incident_end_data);
     vertex->incident_end_data = new_incident_end_data;
+}
+
+void add_crossing_to_edge(DiagramCrossing * crossing, DiagramEdge * edge)
+{
+    DiagramCrossing ** new_crossings =
+	NEW_ARRAY(edge->num_crossings + 1, DiagramCrossing*);
+    for (int i = 0; i < edge->num_crossings; i++)
+    {
+        new_crossings[i] = edge->crossings[i];
+    }
+    new_crossings[edge->num_crossings++] = crossing;
+    my_free(edge->crossings);
+    edge->crossings = new_crossings;
 }
 
 void assign_diagram_arcs(Diagram * diagram)
 {
     diagram->num_arcs = 0;
-    
+
     Boolean drilled_arc;
 
     int queue_begin = 0;
     int queue_end = 0;
-    
+
     /* Each edge appears on the queue at most ones */
     DiagramEdge ** queue = NEW_ARRAY(diagram->num_edges, DiagramEdge *);
 
@@ -184,10 +219,10 @@ void assign_diagram_arcs(Diagram * diagram)
 	    }
 
 	    DiagramEdge * edge = diagram->edges[i];
-		
+
 	    queue[queue_end++] = edge;
 	    visited[edge->edge_id] = TRUE;
-		
+
 	    drilled_arc = edge->type == diagramDrilled;
 	    if (!drilled_arc)
 	    {
@@ -208,7 +243,7 @@ void assign_diagram_links(Diagram * diagram)
 
     int queue_begin = 0;
     int queue_end = 0;
-    
+
     /* Each edge appears on the queue at most ones */
     DiagramEdge ** queue = NEW_ARRAY(diagram->num_edges, DiagramEdge *);
 
@@ -252,7 +287,7 @@ void assign_diagram_links(Diagram * diagram)
 	}
 
 	diagram->num_links++;
-	
+
 	for (int i = 0; i < diagram->num_edges; i++)
 	{
 	    if (visited[i])
@@ -265,24 +300,29 @@ void assign_diagram_links(Diagram * diagram)
 	}
     }
 
-    for (int i = 0; i < diagram->num_vertices; i++) {
+    for (int i = 0; i < diagram->num_vertices; i++)
+    {
 	DiagramVertex * v = diagram->vertices[i];
 	v->link_id = -1;
 	for (int j = 0; j < v->num_incident_end_data; j++)
 	{
-	    if (v->incident_end_data[j]->edge->type == diagramDrilled) {
+	    if (v->incident_end_data[j]->edge->type == diagramDrilled)
+	    {
 		v->link_id = v->incident_end_data[j]->edge->link_id;
 		break;
 	    }
 	}
-	if (v->link_id >= 0) {
+	if (v->link_id >= 0)
+	{
 	    continue;
 	}
-	if (v->num_incident_end_data > 2) {
+	if (v->num_incident_end_data > 2)
+	{
 	    v->link_id = diagram->num_links++;
 	    continue;
 	}
-	if (v->num_incident_end_data == 2) {
+	if (v->num_incident_end_data == 2)
+	{
 	    Boolean singular_loop = TRUE;
 	    int arc = v->incident_end_data[0]->edge->arc_id;
 
@@ -308,7 +348,7 @@ void assign_diagram_links(Diagram * diagram)
 		{
 		    break;
 		}
-	    }	
+	    }
 	    if (singular_loop)
 	    {
 		v->link_id = diagram->num_links++;
@@ -323,15 +363,16 @@ void assign_diagram_links(Diagram * diagram)
 char * dump_diagram(Diagram * diagram)
 {
     size_t size = 10000000;
-    
+
     char * buffer = my_malloc(size);
     char * p = buffer;
     char * end = buffer + size - 1;
 
     p += snprintf(p, end - p, "num_arcs = %d\n", diagram->num_arcs);
     p += snprintf(p, end - p, "num_links = %d\n", diagram->num_links);
-    
-    for (int i = 0; i < diagram->num_vertices; i++) {
+
+    for (int i = 0; i < diagram->num_vertices; i++)
+    {
 	DiagramVertex * v = diagram->vertices[i];
 	p += snprintf(p, end - p, "Vertex:\n");
 	p += snprintf(p, end - p, "    %d %d\n", v->x, v->y);
@@ -345,7 +386,8 @@ char * dump_diagram(Diagram * diagram)
 	}
     }
 
-    for (int i = 0; i < diagram->num_edges; i++) {
+    for (int i = 0; i < diagram->num_edges; i++)
+    {
 	DiagramEdge * e = diagram->edges[i];
 	p += snprintf(p, end - p, "Edge:\n");
 	p += snprintf(p, end - p, "    %d %d\n", e->vertex[0]->vertex_id, e->vertex[1]->vertex_id);
@@ -356,7 +398,8 @@ char * dump_diagram(Diagram * diagram)
 	}
     }
 
-    for (int i = 0; i < diagram->num_crossings; i++) {
+    for (int i = 0; i < diagram->num_crossings; i++)
+    {
 	DiagramCrossing * c = diagram->crossings[i];
 	p += snprintf(p, end - p, "Crossing:\n");
 	p += snprintf(p, end - p, "    %d\n", c->crossing_id);
@@ -364,7 +407,7 @@ char * dump_diagram(Diagram * diagram)
 	p += snprintf(p, end - p, "    %d %d\n", c->over->edge_id, c->under->edge_id);
 	p += snprintf(p, end - p, "    %lf %lf\n", c->position_on_overstrand, c->position_on_understrand);
     }
-    
+
     return buffer;
 }
 
@@ -394,6 +437,139 @@ diagram_get_crossing_signs(Diagram * diagram)
 
         c->crossing_sign = ( w.imag > 0 ) ? 1 : -1;
     }
+}
 
-  
+void
+diagram_ed_angles(Diagram * diagram)
+{
+    for (int i = 0; i < diagram->num_vertices; i++)
+    {
+        DiagramVertex * v = diagram->vertices[i];
+	for (int j = 0; j < v->num_incident_end_data; j++)
+	{
+  	    DiagramEndData * e = v->incident_end_data[j];
+	    Complex z =
+  	        complex_minus(
+		    point_position_to_complex(e->edge->vertex[diagramEnd]),
+		    point_position_to_complex(e->edge->vertex[diagramBegin]));
+	    if (e->type == diagramEnd)
+	    {
+    	        z = complex_negate(z);
+	    }
+	    e->angle = -atan2(z.imag, z.real);/* minus???? */
+	}
+    }
+}
+
+void
+assign_diagram_crossings_to_edges(Diagram * diagram)
+{
+    for (int i = 0; i < diagram->num_crossings; i++)
+    {
+        DiagramCrossing * c = diagram->crossings[i];
+	add_crossing_to_edge(c, c->over);
+	add_crossing_to_edge(c, c->under);
+    }
+}
+
+void
+prepare_diagram_components_for_output(Diagram * diagram)
+{
+    {
+        int     link_id = -5;
+
+	for (int i = 0; i < diagram->num_arcs; i++)
+	{
+    	    for (int j = 0; j < diagram->num_edges; j++)
+	    {
+	        DiagramEdge *e = diagram->edges[j];
+		if (e->arc_id == i)
+		{
+  		    for(int k = 0; k < 2; k++)
+		    {
+		        if (e->vertex[k]->link_id != -1 )
+		        {
+			    e->vertex[k]->incident_end_data[diagram_get_strand(e,e->vertex[k])]->singular=(k==1);
+			    if (k == 0)
+			    {
+			        link_id = e->vertex[k]->link_id;
+			    }
+			}
+		    }
+		}
+	    }
+    	    for (int j = 0; j < diagram->num_edges; j++)
+	    {
+	        DiagramEdge *e = diagram->edges[j];
+		if (e->arc_id == i)
+		{
+  		    e->link_id = link_id;
+		}
+	    }
+	}
+    }
+
+    for(int i = 0; i < diagram->num_vertices; i++)
+    {
+        DiagramVertex *v = diagram->vertices[i];
+        if (v->link_id == -1 )
+	{
+  	    for( int j = 0; j < v->num_incident_end_data; j++)
+	    {
+	        if (v->incident_end_data[j]->edge->type == diagramDrilled)
+		{
+ 		    v->link_id = v->incident_end_data[j]->edge->link_id;
+		}
+	    }
+	}
+    }
+}
+
+int diagram_get_strand(DiagramEdge * e, DiagramVertex * v)
+{
+    for (int i = 0; i < v->num_incident_end_data; i++)
+    {
+        if (e == v->incident_end_data[i]->edge)
+	{
+	    return i;
+        }
+    }
+
+    fprintf(stderr, "ERR: diagram_get_strand\n");
+    return -1;
+}
+
+DiagramCrossing * get_next_crossing(DiagramEdge *e, DiagramCrossing *c)
+{
+    int i;
+    for (i = 0; i < e->num_crossings; i++)
+    {
+	if (e->crossings[i] == c)
+	{
+	    break;
+	}
+    }
+
+    if (i + 1 < e->num_crossings)
+    {
+	return e->crossings[i + 1];
+    }
+    return NULL;
+}
+
+DiagramCrossing * get_prev_crossing(DiagramEdge *e, DiagramCrossing *c)
+{
+    int i;
+    for (i = 0; i < e->num_crossings; i++)
+    {
+	if (e->crossings[i] == c)
+	{
+	    break;
+	}
+    }
+
+    if (0 < i && i < e->num_crossings) {
+	return e->crossings[i - 1];
+    }
+    return NULL;
 }

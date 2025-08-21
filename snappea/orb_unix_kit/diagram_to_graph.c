@@ -2,21 +2,96 @@
 
 #include <stdlib.h>
 
+static int cmp(double d1, double d2)
+{
+    if (d1 < d2) {
+	return -1;
+    }
+    if (d1 > d2) {
+	return +1;
+    }
+    return 0;
+}
+
 static int ed_more(const void *d1, const void *d2)
 {
     // return ed1->angle > ed2->angle;
 
   
-    DiagramEndData * ed1 = (DiagramEndData *)d1;
-    DiagramEndData * ed2 = (DiagramEndData *)d2;
+    DiagramEndData * ed1 = *(DiagramEndData **)d1;
+    DiagramEndData * ed2 = *(DiagramEndData **)d2;
 
-    if (ed1->angle > ed2->angle) {
-        return +1;
+    return cmp(ed2->angle, ed1->angle);
+}
+
+static int crossing_less(const void *d1, const void *d2)
+{
+    DiagramCrossing *c1 = *(DiagramCrossing **)d1;
+    DiagramCrossing *c2 = *(DiagramCrossing **)d2;
+    
+    if (c1->over == c2->over)
+    {
+	return cmp(c1->position_on_overstrand, c2->position_on_overstrand);
     }
-    if (ed1->angle < ed2->angle) {
-        return -1;
+
+    if (c1->over == c2->under)
+    {
+	return cmp(c1->position_on_overstrand, c2->position_on_understrand);
     }
+
+    if (c1->under == c2->over)
+    {
+	return cmp(c1->position_on_understrand, c2->position_on_overstrand);
+    }
+
+    if (c1->under == c2->under)
+    {
+	return cmp(c1->position_on_understrand, c2->position_on_understrand);
+    }
+
     return 0;
+}
+
+void remove_meeting( Graph *graph, int index )
+{
+    if ( index>= graph->num_meetings)
+    {
+	return;
+    }
+
+    GraphMeeting *old_array = graph->meeting;
+    GraphMeeting *new_array = NEW_ARRAY(graph->num_meetings-1, GraphMeeting );
+
+    for (int i = 0, j=0; i< graph->num_meetings-1; i++ )
+    {
+        if (i == index)
+	{
+	    j++;
+	}
+
+        new_array[i].type = old_array[i+j].type;
+	new_array[i].handedness = old_array[i+j].handedness;
+        new_array[i].num_strands = old_array[i+j].num_strands;
+        new_array[i].label = old_array[i+j].label;
+        new_array[i].strand = old_array[i+j].strand;
+        new_array[i].component = old_array[i+j].component;
+        new_array[i].neighbor = old_array[i+j].neighbor;
+    }
+
+    my_free(old_array);
+    graph->meeting = new_array;
+    graph->num_meetings--;
+
+    for(int i = 0; i < graph->num_meetings; i++)
+    {
+	for(int j=0; j < graph->meeting[i].num_strands; j++)
+	{
+	    if (graph->meeting[i].neighbor[j] >= index)
+	    {
+		graph->meeting[i].neighbor[j]--;
+	    }
+	}
+    }
 }
 
 Graph * diagram_to_graph(Diagram * diagram)
@@ -24,17 +99,16 @@ Graph * diagram_to_graph(Diagram * diagram)
     int num_meetings = 0;
 
     diagram_get_crossing_signs(diagram);
-    
-    ed_angles();
-    assign_crossings_to_edges();
-    prepare_components_for_output();
+    diagram_ed_angles(diagram);
+    assign_diagram_crossings_to_edges(diagram);
+    prepare_diagram_components_for_output(diagram);
 
     for(int i = 0; i < diagram->num_vertices; i++)
     {
         diagram->vertices[i]->vertex_id = num_meetings++;
 	qsort(diagram->vertices[i]->incident_end_data,
 	      diagram->vertices[i]->num_incident_end_data,
-	      sizeof(DiagramEndData),
+	      sizeof(DiagramEndData*),
 	      &ed_more);
     }
 
@@ -46,7 +120,7 @@ Graph * diagram_to_graph(Diagram * diagram)
     for(int i = 0; i < diagram->num_edges; i++) {
         qsort(diagram->edges[i]->crossings,
 	      diagram->edges[i]->num_crossings,
-	      sizeof(DiagramCrossing),
+	      sizeof(DiagramCrossing*),
 	      &crossing_less);
     }
 
@@ -82,7 +156,7 @@ Graph * diagram_to_graph(Diagram * diagram)
 	    {
 	        if (e->num_crossings == 0)
 		{
-		    meeting->strand[j] = get_strand(e, e->vertex[diagramEnd]);
+		    meeting->strand[j] = diagram_get_strand(e, e->vertex[diagramEnd]);
 		    meeting->neighbor[j] = e->vertex[diagramEnd]->vertex_id;
 		}
 		else
@@ -104,7 +178,7 @@ Graph * diagram_to_graph(Diagram * diagram)
 	    {
 	        if (e->num_crossings == 0)
 		{
-		    meeting->strand[j] = get_strand(e, e->vertex[diagramBegin]);
+		    meeting->strand[j] = diagram_get_strand(e, e->vertex[diagramBegin]);
 		    meeting->neighbor[j] = e->vertex[diagramBegin]->vertex_id;
 		}
 		else
@@ -152,7 +226,7 @@ Graph * diagram_to_graph(Diagram * diagram)
 
           if ( (other = get_prev_crossing( e, c)) == NULL)
           {
-                meeting->strand[0] = get_strand( e, e->vertex[diagramBegin] );
+                meeting->strand[0] = diagram_get_strand( e, e->vertex[diagramBegin] );
                 meeting->neighbor[0] = e->vertex[diagramBegin]->vertex_id;
           }
           else
@@ -163,7 +237,7 @@ Graph * diagram_to_graph(Diagram * diagram)
 
           if ( (other = get_next_crossing( e, c)) == NULL)
           {
-                meeting->strand[2] = get_strand( e, e->vertex[diagramEnd] );
+                meeting->strand[2] = diagram_get_strand( e, e->vertex[diagramEnd] );
                 meeting->neighbor[2] = e->vertex[diagramEnd]->vertex_id;
           }
           else
@@ -179,7 +253,7 @@ Graph * diagram_to_graph(Diagram * diagram)
 
           if ( (other = get_prev_crossing( e, c)) == NULL)
           {
-                meeting->strand[1] = get_strand( e, e->vertex[diagramBegin] );
+                meeting->strand[1] = diagram_get_strand( e, e->vertex[diagramBegin] );
                 meeting->neighbor[1] = e->vertex[diagramBegin]->vertex_id;
           }
           else
@@ -190,7 +264,7 @@ Graph * diagram_to_graph(Diagram * diagram)
 
           if ( (other = get_next_crossing( e, c)) == NULL)
           {
-                meeting->strand[3] = get_strand( e, e->vertex[diagramEnd] );
+                meeting->strand[3] = diagram_get_strand( e, e->vertex[diagramEnd] );
                 meeting->neighbor[3] = e->vertex[diagramEnd]->vertex_id;
           }
           else
@@ -296,6 +370,6 @@ Graph * diagram_to_graph(Diagram * diagram)
 
     
   
-    return NULL;
+    return graph;
 }
 

@@ -281,7 +281,7 @@ void assign_diagram_links(Diagram * diagram)
 	    v->link_id = diagram->num_links++;
 	    continue;
 	}
-	if (v->num_incident_end_data > 2) {
+	if (v->num_incident_end_data == 2) {
 	    Boolean singular_loop = TRUE;
 	    int arc = v->incident_end_data[0]->edge->arc_id;
 

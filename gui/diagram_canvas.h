@@ -55,8 +55,8 @@ struct Vertex
 struct Crossing
 {
     QPoint position;
-    int crossing_id;
-    int crossing_sign;
+    int crossing_id = 0;
+    int crossing_sign = 0;
     Edge *over, *under;
     double position_on_overstrand, position_on_understrand;
     void switchCrossing();
@@ -100,6 +100,8 @@ public:
     void deleteArc( int a );
     void drillArc( int a );
 
+    char * dump();
+			  
 public slots:
 	void drillToggle();
 	void deleteSelectedEdges();

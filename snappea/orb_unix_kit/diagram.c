@@ -3,6 +3,7 @@
 /* for my_free */
 #include "kernel.h"
 #include "kernel_typedefs.h"
+#include "SnapPea.h"
 
 #include <stdio.h>
 
@@ -365,4 +366,34 @@ char * dump_diagram(Diagram * diagram)
     }
     
     return buffer;
+}
+
+static
+Complex
+point_position_to_complex(DiagramVertex * v)
+{
+    Complex r;
+    r.real = v->x;
+    r.imag = v->y;
+    return r;
+}
+
+void
+diagram_get_crossing_signs(Diagram * diagram)
+{
+    for (int i = 0; i < diagram->num_crossings; i++)
+    {
+        DiagramCrossing *c = diagram->crossings[i];
+
+        Complex z1 = point_position_to_complex(c->over->vertex[diagramBegin]);
+        Complex z2 = point_position_to_complex(c->over->vertex[diagramEnd]);
+        Complex z3 = point_position_to_complex(c->under->vertex[diagramBegin]);
+
+        // w = ( z3 - z1 ) / ( z2 - z1 );
+	Complex w = complex_div(complex_minus(z3, z1), complex_minus(z2, z1));
+
+        c->crossing_sign = ( w.imag > 0 ) ? 1 : -1;
+    }
+
+  
 }

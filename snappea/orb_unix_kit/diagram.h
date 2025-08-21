@@ -15,5 +15,7 @@ void assign_diagram_arcs(Diagram *);
 // Corresponds to DiagramCanvas::assign_links.
 void assign_diagram_links(Diagram *);
 
+void
+diagram_get_crossing_signs(Diagram * diagram);
 
 #endif

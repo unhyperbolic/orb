@@ -23,7 +23,8 @@ Graph * diagram_to_graph(Diagram * diagram)
 {
     int num_meetings = 0;
 
-    getCrossingSigns();
+    diagram_get_crossing_signs(diagram);
+    
     ed_angles();
     assign_crossings_to_edges();
     prepare_components_for_output();

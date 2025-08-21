@@ -46,9 +46,9 @@ struct Vertex
     Vertex( QPoint point);
     ~Vertex();
     QPoint position;
-    int connected_component;
-    int vertex_id;
-    int link_id;
+    int connected_component = 0;
+    int vertex_id = 0;
+    int link_id = 0;
     vector<EndData *> incidentEndData;
 };
 

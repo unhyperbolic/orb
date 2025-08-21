@@ -152,7 +152,7 @@
 #define RELEASED 1
 
 /* Define if you have inline */
-#undef HAVE_INLINE
+// #define HAVE_INLINE 1
 
 /* Define if you need to hide the static definitions of inline functions */
 /* #undef HIDE_INLINE_STATIC */

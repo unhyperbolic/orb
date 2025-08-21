@@ -24,3 +24,6 @@ clean:
 	rm -f liborb.a ../orb_solution_for_snappea_finite_triangulation *.o
 
 include Makefile.dependencies
+
+clean:
+	rm liborb.a ${OBJS}

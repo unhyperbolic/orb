@@ -93,10 +93,10 @@ void DiagramCanvas::mousePressEvent(QMouseEvent *e)
                                       vertex = vertexList[vertex_index];
 
                                       paint( currentEdge, TRUE );
-                                      currentEdge->vertex[end]->~Vertex();
-                                      currentEdge->vertex[end] = vertex;
+                                      currentEdge->vertex[end_]->~Vertex();
+                                      currentEdge->vertex[end_] = vertex;
 
-                                      EndData *ed = new EndData( currentEdge, end );
+                                      EndData *ed = new EndData( currentEdge, end_ );
 
                                       vertex->incidentEndData.insert(
                                              vertex->incidentEndData.end(), ed );
@@ -116,7 +116,7 @@ void DiagramCanvas::mousePressEvent(QMouseEvent *e)
                               {
                                       Vertex *vertex, *new_vertex;
 
-                                      vertex = currentEdge->vertex[end];
+                                      vertex = currentEdge->vertex[end_];
                                       vertexList.insert( vertexList.end(), vertex );
 
                                       edgeList.insert( edgeList.end(), currentEdge );
@@ -200,8 +200,8 @@ void DiagramCanvas::mousePressEvent(QMouseEvent *e)
 
                              paint( currentEdge, TRUE );
 
-                             vertex = currentEdge->vertex[begin];
-                             currentEdge->vertex[end]->~Vertex();
+                             vertex = currentEdge->vertex[begin_];
+                             currentEdge->vertex[end_]->~Vertex();
 
                              currentEdge->~Edge();
 
@@ -432,8 +432,8 @@ void DiagramCanvas::paint_all( QRect& r )
 
         QPoint v, v1, v2, p1, p2 ;
 
-        p1 = e->vertex[begin]->position;
-        p2 = e->vertex[end]->position;
+        p1 = e->vertex[begin_]->position;
+        p2 = e->vertex[end_]->position;
         p.drawLine( p1, p2 );
 /*
       if (e->edge_type==singular)
@@ -485,8 +485,8 @@ void DiagramCanvas::paint_all( QRect& r )
             p.setClipRegion( mask );
             QPoint v, v1, v2, p1, p2 ;
 
-            p1 = e->vertex[begin]->position;
-            p2 = e->vertex[end]->position;
+            p1 = e->vertex[begin_]->position;
+            p2 = e->vertex[end_]->position;
             p.drawLine( p1, p2 );
 /*
             if (e->edge_type==singular)
@@ -513,8 +513,8 @@ void DiagramCanvas::paint_all( QRect& r )
         {
             QPoint v, v1, v2, p1, p2 ;
 
-            p1 = e->vertex[begin]->position;
-            p2 = e->vertex[end]->position;
+            p1 = e->vertex[begin_]->position;
+            p2 = e->vertex[end_]->position;
             p.drawLine( p1, p2 );
 /*
             if (e->edge_type==singular)
@@ -568,8 +568,8 @@ void DiagramCanvas::paint( Edge *edge, bool paint_over )
 
     QPoint v, v1, v2, p1, p2 ;
 
-    p1 = edge->vertex[begin]->position;
-    p2 = edge->vertex[end]->position;
+    p1 = edge->vertex[begin_]->position;
+    p2 = edge->vertex[end_]->position;
     p.drawLine( p1, p2 );
 /*
     if (edge->edge_type==singular && edge_color != NEW_EDGE)
@@ -600,7 +600,7 @@ void DiagramCanvas::redrawMovedEdge( QMouseEvent *e )
 
     paint( currentEdge, TRUE);
 
-    currentEdge->vertex[end]->position = newEndPoint;
+    currentEdge->vertex[end_]->position = newEndPoint;
 
     paint( currentEdge, FALSE );
 }
@@ -640,8 +640,8 @@ void DiagramCanvas::delete_dragged_crossings()
     {
         Crossing *c = *i;
 
-        if ( c->over->vertex[begin] == draggedVertex || c->over->vertex[end] == draggedVertex
-                || c->under->vertex[begin] == draggedVertex || c->under->vertex[end] == draggedVertex )
+        if ( c->over->vertex[begin_] == draggedVertex || c->over->vertex[end_] == draggedVertex
+                || c->under->vertex[begin_] == draggedVertex || c->under->vertex[end_] == draggedVertex )
         {
             crossingList.erase( i );
             update();

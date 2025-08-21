@@ -9,6 +9,8 @@ all: graph2manifold.o graph_complement.o casson.o test_parse_util test_parse_orb
 test_parse_orb: test_parse_orb.o parse_orb.o casson.o parse_util.o diagram.o ../code/liborb.a
 	gcc test_parse_orb.o parse_orb.o parse_util.o diagram.o ../code/*.o casson.o  -lm -o test_parse_orb
 
+next_step: diagram_to_graph.o
+
 test_parse_util: test_parse_util.o parse_util.o
 	gcc test_parse_util.o parse_util.o -o test_parse_util
 

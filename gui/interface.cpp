@@ -231,6 +231,8 @@ void DiagramCanvas::readDiagram( QTextStream &stream )
 
     untouched =  (num_arcs + num_links > 0) ? FALSE :TRUE;
 
+    printf("%s\n", dump());
+    
 }
 
 void DiagramCanvas::deleteSelectedEdges()

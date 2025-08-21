@@ -4,51 +4,24 @@
 #include "kernel.h"
 #include "kernel_typedefs.h"
 
-void assign_diagram_arcs(Diagram * diagram)
+void initialize_diagram(Diagram * diagram)
 {
     diagram->num_arcs = 0;
-    
-    Boolean drilled_arc;
-
-    int queue_length = 0;
-    
-    /* Each edge appears on the queue at most ones */
-    DiagramEdge ** queue = NEW_ARRAY(diagram->num_edges, DiagramEdge *);
-
-    Boolean * visited = NEW_ARRAY(diagram->num_edges, Boolean);
-
-    for (int i = 0; i < diagram->num_edges; i++) {
-	DiagramEdge * edge = diagram->edges[i];
-	edge->edge_id = i;
-	edge->arc_id = -1;
-	visited[i] = FALSE;
-    }
-
-    {
-	DiagramEdge * edge = diagram->edges[0];
-	queue[queue_length++] = edge;
-	visited[0] = TRUE;
-	drilled_arc = edge->type == diagramDrilled;
-	if (!drilled_arc) {
-	    edge->arc_id = diagram->num_arcs;
-	}
-    }
-
-    while (queue_length) {
-	while (queue_length) {
-	    DiagramEdge * e = queue[queue_length - 1];
-
-//	    for (
-
-	}
-	
-    }
-    
+    diagram->num_links = 0;
+    diagram->num_vertices = 0;
+    diagram->vertices = NULL;
+    diagram->num_edges = 0;
+    diagram->edges = NULL;
+    diagram->num_crossings = 0;
+    diagram->crossings = NULL;
 }
 
-void assign_diagram_links(Diagram * diagram)
+void initialize_diagram_vertex(DiagramVertex *vertex)
 {
-
+    vertex->vertex_id = -1;
+    vertex->link_id = -1;
+    vertex->num_incident_end_data = 0;
+    vertex->incident_end_data = NULL;
 }
 
 static void free_diagram_vertex(DiagramVertex *vertex)
@@ -100,3 +73,132 @@ void free_diagram(Diagram *diagram)
 
     my_free(diagram);
 }
+
+void add_end_data_to_vertex(DiagramEndData * data, DiagramVertex * vertex)
+{
+    DiagramEndData ** new_incident_end_data =
+	NEW_ARRAY(vertex->num_incident_end_data + 1, DiagramEndData*);
+    for (int i = 0; i < vertex->num_incident_end_data; i++) {
+	new_incident_end_data[i] = vertex->incident_end_data[i];
+    }
+    new_incident_end_data[vertex->num_incident_end_data++] = data;
+    my_free(vertex->incident_end_data);	
+    vertex->incident_end_data = new_incident_end_data;
+}
+
+void assign_diagram_arcs(Diagram * diagram)
+{
+    diagram->num_arcs = 0;
+    
+    Boolean drilled_arc;
+
+    int queue_begin = 0;
+    int queue_end = 0;
+    
+    /* Each edge appears on the queue at most ones */
+    DiagramEdge ** queue = NEW_ARRAY(diagram->num_edges, DiagramEdge *);
+
+    Boolean * visited = NEW_ARRAY(diagram->num_edges, Boolean);
+
+    for (int i = 0; i < diagram->num_edges; i++)
+    {
+	DiagramEdge * edge = diagram->edges[i];
+	edge->edge_id = i;
+	edge->arc_id = -1;
+	visited[i] = FALSE;
+    }
+
+    {
+	DiagramEdge * edge = diagram->edges[0];
+	queue[queue_begin++] = edge;
+	visited[0] = TRUE;
+	drilled_arc = edge->type == diagramDrilled;
+	if (!drilled_arc)
+	{
+	    edge->arc_id = diagram->num_arcs;
+	}
+    }
+
+    while (queue_begin < queue_end)
+    {
+	while (queue_begin < queue_end)
+	{
+	    DiagramEdge * e = queue[queue_begin++];
+	    for (int i = 0; i < 2; i++)
+	    {
+		DiagramVertex * v = e->vertex[i];
+
+		if (e->vertex[i]->num_incident_end_data == 2)
+		{
+		    int j = (v->incident_end_data[0]->edge == e) ? 1 : 0;
+		    DiagramEdge *e1 = v->incident_end_data[j]->edge;
+		    Boolean needsSwitch = v->incident_end_data[j]->type == i;
+		    if (!visited[e1->edge_id])
+		    {
+			visited[e1->edge_id] = TRUE;
+
+			if (!drilled_arc)
+			{
+			    e1->arc_id = diagram->num_arcs;
+			}
+
+			if (needsSwitch)
+			{
+			    DiagramVertex *temp;
+			    temp = e1->vertex[0];
+			    e1->vertex[0] = e1->vertex[1];
+			    e1->vertex[1] = temp;
+
+			    for (int j = 0; j < 2; j++)
+			    {
+				for (int k = 0; k < e1->vertex[j]->num_incident_end_data; k++)
+				{
+				    if (e1->vertex[j]->incident_end_data[k]->edge == e1)
+				    {
+					e1->vertex[j]->incident_end_data[k]->type =
+					    1 - e1->vertex[j]->incident_end_data[k]->type;
+				    }
+				}
+			    }
+			}
+
+			queue[queue_end++] = e1;
+		    }
+		}
+	    }
+	}
+
+	if (!drilled_arc)
+	{
+	    diagram->num_arcs++;
+	}
+
+	for (int i = 0; i < diagram->num_edges; i++)
+	{
+	    if (visited[i])
+	    {
+		continue;
+	    }
+
+	    DiagramEdge * edge = diagram->edges[i];
+		
+	    queue[queue_begin++] = edge;
+	    visited[edge->edge_id] = TRUE;
+		
+	    drilled_arc = edge->type == diagramDrilled;
+	    if (!drilled_arc)
+	    {
+		edge->arc_id = diagram->num_arcs;
+	    }
+
+	    break;
+	}
+    }
+    
+}
+
+void assign_diagram_links(Diagram * diagram)
+{
+
+}
+

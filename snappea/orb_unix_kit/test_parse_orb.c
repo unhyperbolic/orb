@@ -8,11 +8,12 @@ int main()
 {
     char *name = NULL;
     CassonFormat * casson = NULL;
+    Diagram * diagram = NULL;
     char *orb_link_projection_data = NULL;
     Triangulation * trig = NULL;
     Boolean ok = FALSE;
 
-    read_orb("example.orb", &name, &casson, &orb_link_projection_data);
+    read_orb("example.orb", &name, &casson, &diagram);
 
     if (casson) {
         printf("Status: Got it\n");
@@ -22,8 +23,8 @@ int main()
         printf("Status: Name: %s\n", name);
     }
 
-    if (orb_link_projection_data) {
-        printf("plink: %s\n", orb_link_projection_data);
+    if (diagram) {
+        printf("Status: Got diagram\n");
     }
 
     if (!verify_casson(casson)) {

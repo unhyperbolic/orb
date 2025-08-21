@@ -11,7 +11,7 @@ typedef struct Diagram Diagram;
 
 enum DiagramEndType
 {
-    diagramBegin,
+    diagramBegin = 0,
     diagramEnd
 };
 typedef enum DiagramEndType DiagramEndType;
@@ -70,7 +70,6 @@ struct Diagram
 {
     int num_arcs;
     int num_links;
-    int num_cuffs;
     int num_vertices;
     DiagramVertex **vertices;
     int num_edges;

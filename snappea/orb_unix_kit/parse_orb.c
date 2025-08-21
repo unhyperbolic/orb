@@ -323,10 +323,6 @@ static CassonFormat *read_casson_from_string_destructive(
 static Boolean fill_diagram_from_string_destructive(
     Diagram * diagram, char *file_data)
 {
-    diagram->vertices = NULL;
-    diagram->edges = NULL;
-    diagram->crossings = NULL;
-
     int index;
     int chars_consumed;
     int num_vertices, num_edges, num_crossings;
@@ -343,7 +339,7 @@ static Boolean fill_diagram_from_string_destructive(
 	 diagram->num_vertices < num_vertices;
 	 diagram->num_vertices++) {
 	diagram->vertices[diagram->num_vertices] = NEW_STRUCT( DiagramVertex );
-	diagram->vertices[diagram->num_vertices]->incident_end_data = NULL;
+	initialize_diagram_vertex(diagram->vertices[diagram->num_vertices]);
 	if (sscanf(file_data,
 		   "%d%d%d%n",
 		   &index,
@@ -377,11 +373,26 @@ static Boolean fill_diagram_from_string_destructive(
 	    return FALSE;
 	}
 
-	diagram->edges[diagram->num_edges]->vertex[0] =
+	diagram->edges[diagram->num_edges]->vertex[diagramBegin] =
 	    diagram->vertices[id0];
-	diagram->edges[diagram->num_edges]->vertex[1] =
+	diagram->edges[diagram->num_edges]->vertex[diagramEnd] =
 	    diagram->vertices[id1];
 	diagram->edges[diagram->num_edges]->type = type;
+
+	DiagramEndData * begin_data = NEW_STRUCT(DiagramEndData);
+	begin_data->edge = diagram->edges[diagram->num_edges];
+	begin_data->type = diagramBegin;
+	begin_data->singular = FALSE;
+	begin_data->angle = 0.0;
+
+	DiagramEndData * end_data = NEW_STRUCT(DiagramEndData);
+	end_data->edge = diagram->edges[diagram->num_edges];
+	end_data->type = diagramEnd;
+	end_data->singular = FALSE;
+	end_data->angle = 0.0;
+
+	add_end_data_to_vertex(begin_data, diagram->vertices[id0]);
+	add_end_data_to_vertex(end_data, diagram->vertices[id1]);
 	
 	file_data += chars_consumed;
     }
@@ -426,10 +437,13 @@ static Diagram *read_diagram_from_string_destructive(
     char * file_data)
 {
     Diagram *diagram = NEW_STRUCT(Diagram);
+    initialize_diagram(diagram);
     if (fill_diagram_from_string_destructive(diagram, file_data)) {
 	return diagram;
     }
 
+    assign_diagram_arcs(diagram);
+    
     free_diagram(diagram);
     return NULL;
 }

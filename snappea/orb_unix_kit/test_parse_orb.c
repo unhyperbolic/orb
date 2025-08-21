@@ -1,6 +1,7 @@
 #include "parse_orb.h"
 
 #include "casson.h"
+#include "diagram.h"
 
 #include <stdio.h>
 
@@ -9,7 +10,6 @@ int main()
     char *name = NULL;
     CassonFormat * casson = NULL;
     Diagram * diagram = NULL;
-    char *orb_link_projection_data = NULL;
     Triangulation * trig = NULL;
     Boolean ok = FALSE;
 
@@ -25,6 +25,7 @@ int main()
 
     if (diagram) {
         printf("Status: Got diagram\n");
+	printf("%s\n", dump_diagram(diagram));
     }
 
     if (!verify_casson(casson)) {

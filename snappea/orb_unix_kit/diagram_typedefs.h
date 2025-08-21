@@ -57,8 +57,8 @@ struct DiagramEdge
     DiagramCrossing **crossings;
     int arc_id;
     int link_id;
-    int cuff_id;
-    int arc;
+//    int cuff_id;
+//    int arc;
     int edge_id;
 //    int thickness; /* ?? */
 //    bool selected; /* ?? */

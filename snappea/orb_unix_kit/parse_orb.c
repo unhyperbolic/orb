@@ -439,12 +439,12 @@ static Diagram *read_diagram_from_string_destructive(
     Diagram *diagram = NEW_STRUCT(Diagram);
     initialize_diagram(diagram);
     if (fill_diagram_from_string_destructive(diagram, file_data)) {
+	assign_diagram_arcs(diagram);
+	assign_diagram_links(diagram);
+    
 	return diagram;
     }
 
-    assign_diagram_arcs(diagram);
-    assign_diagram_links(diagram);
-    
     free_diagram(diagram);
     return NULL;
 }

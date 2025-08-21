@@ -8,6 +8,8 @@ void free_diagram(Diagram *);
 void initialize_diagram_vertex(DiagramVertex *vertex);
 void add_end_data_to_vertex(DiagramEndData * data, DiagramVertex * vertex);
 
+char * dump_diagram(Diagram * diagram);
+
 // Corresponds to DiagramCanvas::assign_arcs.
 void assign_diagram_arcs(Diagram *);
 // Corresponds to DiagramCanvas::assign_links.

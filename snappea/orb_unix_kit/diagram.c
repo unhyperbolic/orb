@@ -4,6 +4,8 @@
 #include "kernel.h"
 #include "kernel_typedefs.h"
 
+#include <stdio.h>
+
 void initialize_diagram(Diagram * diagram)
 {
     diagram->num_arcs = 0;
@@ -317,3 +319,50 @@ void assign_diagram_links(Diagram * diagram)
     my_free(queue);
 }
 
+char * dump_diagram(Diagram * diagram)
+{
+    size_t size = 10000000;
+    
+    char * buffer = my_malloc(size);
+    char * p = buffer;
+    char * end = buffer + size - 1;
+
+    p += snprintf(p, end - p, "num_arcs = %d\n", diagram->num_arcs);
+    p += snprintf(p, end - p, "num_links = %d\n", diagram->num_links);
+    
+    for (int i = 0; i < diagram->num_vertices; i++) {
+	DiagramVertex * v = diagram->vertices[i];
+	p += snprintf(p, end - p, "Vertex:\n");
+	p += snprintf(p, end - p, "    %d %d\n", v->x, v->y);
+	p += snprintf(p, end - p, "    %d %d %d\n", v->connected_component, v->vertex_id, v->link_id);
+	for (int j = 0; j < v->num_incident_end_data; j++) {
+	    DiagramEndData * e = v->incident_end_data[j];
+	    p += snprintf(p, end - p, "    End data:\n");
+	    p += snprintf(p, end - p, "        Edge: %d\n", e->edge->edge_id);
+	    p += snprintf(p, end - p, "        %d %d %lf\n",
+			  e->type, e->singular, e->angle);
+	}
+    }
+
+    for (int i = 0; i < diagram->num_edges; i++) {
+	DiagramEdge * e = diagram->edges[i];
+	p += snprintf(p, end - p, "Edge:\n");
+	p += snprintf(p, end - p, "    %d %d\n", e->vertex[0]->vertex_id, e->vertex[1]->vertex_id);
+	p += snprintf(p, end - p, "    %d %d %d %d\n", e->edge_id, e->arc_id, e->link_id, e->type);
+	for (int j = 0; j < e->num_crossings; j++) {
+	    DiagramCrossing * c = e->crossings[j];
+	    p += snprintf(p, end - p, "    Crossing %d\n", c->crossing_id);
+	}
+    }
+
+    for (int i = 0; i < diagram->num_crossings; i++) {
+	DiagramCrossing * c = diagram->crossings[i];
+	p += snprintf(p, end - p, "Crossing:\n");
+	p += snprintf(p, end - p, "    %d\n", c->crossing_id);
+	p += snprintf(p, end - p, "    %d %d  %d\n", c->x, c->y, c->crossing_sign);
+	p += snprintf(p, end - p, "    %d %d\n", c->over->edge_id, c->under->edge_id);
+	p += snprintf(p, end - p, "    %lf %lf\n", c->position_on_overstrand, c->position_on_understrand);
+    }
+    
+    return buffer;
+}

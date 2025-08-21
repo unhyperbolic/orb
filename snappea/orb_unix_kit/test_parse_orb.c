@@ -4,8 +4,9 @@
 #include "diagram.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
-int main()
+int main(int argc, char **argv)
 {
     char *name = NULL;
     CassonFormat * casson = NULL;
@@ -13,7 +14,12 @@ int main()
     Triangulation * trig = NULL;
     Boolean ok = FALSE;
 
-    read_orb("example.orb", &name, &casson, &diagram);
+    if (argc != 2) {
+	printf("Needs filename\n");
+	exit(1);
+    }
+
+    read_orb(argv[1], &name, &casson, &diagram);
 
     if (casson) {
         printf("Status: Got it\n");
@@ -45,7 +51,7 @@ int main()
     printf("Vol ok: %d\n", ok);
 
     free_casson(casson);
-    
+
     free_triangulation(trig);
 
     return 0;

@@ -12,7 +12,6 @@
 int main(int argc, char **argv)
 {
     char *name = NULL;
-    CassonFormat * casson = NULL;
     Diagram * diagram = NULL;
     Triangulation * trig = NULL;
     Boolean ok = FALSE;
@@ -22,9 +21,9 @@ int main(int argc, char **argv)
 	exit(1);
     }
 
-    read_orb(argv[1], &name, &casson, &diagram);
+    read_orb(argv[1], &name, &trig, &diagram);
 
-    if (casson) {
+    if (trig) {
         printf("Status: Got it\n");
     }
 
@@ -44,23 +43,12 @@ int main(int argc, char **argv)
 	}
     }
 
-    if (!verify_casson(casson)) {
-        printf("Status: verify_casson failed\n");
-        return 1;
-    }
-
-    printf("Status: verify_casson passed\n");
-
-    trig = casson_to_triangulation(casson);
-
     printf("Status: got trig\n");
 
     printf("Solution type: %d\n", find_structure(trig, FALSE));
 
     printf("Volume: %lf\n", my_volume(trig, &ok));
     printf("Vol ok: %d\n", ok);
-
-    free_casson(casson);
 
     free_triangulation(trig);
 

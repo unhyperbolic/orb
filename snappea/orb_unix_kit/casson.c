@@ -4,12 +4,6 @@
 
 #include <stddef.h>
 
-const int vertex_at_faces[4][4] = {
-    {9,2,3,1},
-    {3,9,0,2},
-    {1,3,9,0},
-    {2,0,1,9}};
-
 Boolean verify_casson(
         CassonFormat *cf)
 {

@@ -5,6 +5,7 @@
 
 #include "casson.h"
 
-CassonFormat *read_casson_struct(char ** str);
+Triangulation * read_casson_format(char ** str);
+
 
 #endif

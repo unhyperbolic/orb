@@ -176,52 +176,42 @@ static Boolean has_non_whitespace(
     return FALSE;
 }
 
-static void read_orb_from_string_destructive(
-        char **file_data,
+void read_orb_from_string(
+        char *str,
         char ** name,
-        CassonFormat ** cf,
+        Triangulation ** trig,
 	Diagram ** diagram)
 {
     char * l;
 
-    l = parse_line(file_data);
+    char *p = str;
+
+    printf("Here\n");
+    
+    l = parse_line(&p);
     if (!l || strcmp(l, "% orb") != 0) {
         return;
     }
 
-    l = parse_line(file_data);
+    l = parse_line(&p);
     if (!l) {
         return;
     }
 
     *name = my_strdup(l);
+    
+    *trig = read_casson_format(&p);
 
-    *cf = read_casson_struct(file_data);
-
-    if (*cf && *file_data && has_non_whitespace(*file_data)) {
+    if (has_non_whitespace(p)) {
         *diagram = read_diagram_from_string_destructive(
-	    *file_data);
+	    *&p);
     }
-}
-
-void read_orb_from_string(
-        char *file_data,
-        char **name,
-        CassonFormat ** cf,
-	Diagram ** diagram)
-{
-    char * copy = my_strdup(file_data);
-    char * p = copy;
-
-    read_orb_from_string_destructive(&p, name, cf, diagram);
-
-    free(copy);
 }
 
 void read_orb(
         const char *file_name,
         char **name,
-        CassonFormat ** cf,
+	Triangulation ** trig,
 	Diagram ** diagram)
 {
     // Follows unit_kit/unix_file_io.c
@@ -249,8 +239,7 @@ void read_orb(
         return;
     }
 
-    p = buffer;
-    read_orb_from_string_destructive(&p, name, cf, diagram);
+    read_orb_from_string(buffer, name, trig, diagram);
 
     free(buffer);
 }

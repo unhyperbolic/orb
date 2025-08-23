@@ -54,6 +54,16 @@ static SolutionType string_to_solution_type(char *s)
     return not_attempted;
 }
 
+char
+advance_my(char **string)
+{
+    while (**string == ' ')
+    {
+	(*string)++;
+    }
+    return **string;
+}
+
 static Boolean fill_casson_from_string_destructive(
         CassonFormat *cf,
         char **file_data)
@@ -61,8 +71,6 @@ static Boolean fill_casson_from_string_destructive(
     int             i;
     char            *line,
                     *section;
-    EdgeInfo        *nei = NULL,
-                    *ei = NULL;
     TetEdgeInfo     *ntei = NULL,
                     *tei = NULL;
     char            f1, f2;
@@ -73,136 +81,136 @@ static Boolean fill_casson_from_string_destructive(
     cf->vertices_known = FALSE;
     cf->type = not_attempted;
 
-    if (!(section = parse_token_next_non_empty_line(file_data, &line))) {
-        return FALSE;
+    int consumed;
+
+    {
+	char solution_type[128];
+	if (sscanf(*file_data, " SolutionType %127s%n", solution_type, &consumed) == 1)
+	{
+	    // Set cf->type based on section
+	    // see branches at 712
+	    cf->type = string_to_solution_type(solution_type);
+	    *file_data += consumed;
+	}
     }
 
-    if (strcmp(section, "SolutionType") == 0) {
-        if (!(section = parse_token(&line))) {
-            return FALSE;
-        }
-
-        // Set cf->type based on section
-        // see branches at 712
-        cf->type = string_to_solution_type(section);
-
-        if (!(section = parse_token_next_non_empty_line(file_data, &line))) {
-            return FALSE;
-        }
-    }
-
-    if (strcmp(section, "vertices_known")  == 0) {
+    if (sscanf(*file_data, " vertices_known%n", &consumed) == 0)
+    {
         cf->vertices_known = TRUE;
-
-        if (!(section = parse_token_next_non_empty_line(file_data, &line))) {
-            return FALSE;
-        }
+	*file_data += consumed; 
     }
 
-    do {
-        nei = NEW_STRUCT(EdgeInfo);
-        if (cf->head == NULL) {
-            cf->head = nei;
-        } else {
-            ei->next = nei;
-        }
-        nei->next = NULL;
-        nei->head = NULL;
+    printf("F\n");
+    
+    EdgeInfo *e = NULL;
 
-        ei = nei;
+    do
+    {
+	if (e)
+	{
+	    e = e->next = NEW_STRUCT(EdgeInfo);
+	}
+	else
+	{
+	    e = cf->head = NEW_STRUCT(EdgeInfo);
+	}
+        e->next = NULL;
+        e->head = NULL;
 
+	if (sscanf(
+		*file_data,
+		" %d %d %lf%n",
+		&e->index, &e->singular_index, &e->singular_order, &consumed) != 3) {
+	    return FALSE;
+	}
 
-        if (sscanf(section, "%d%c", &(ei->index), &dummy) != 1) {
-            return FALSE;
-        }
-        (ei->index)--;
+	*file_data += consumed;
+	
+	e->index--;
+	e->singular_index--;
 
-        if (!(section = parse_token(&line))) {
-            return FALSE;
-        }
-
-        if (sscanf(section, "%d%c", &(ei->singular_index), &dummy) != 1) {
-            return FALSE;
-        }
-
-        (ei->singular_index)--;
-
-        if (!(section = parse_token(&line))) {
-            return FALSE;
-        }
-
-        if (sscanf(section, "%lf%c", &(ei->singular_order), &dummy) != 1) {
-            return FALSE;
-        }
-
-        if (!(section = parse_token(&line))) {
-            return FALSE;
-        }
-
-        if (cf->vertices_known) {
-            if (sscanf(section, "%d%c", &(ei->one_vertex), &dummy) != 1) {
+        if (cf->vertices_known)
+	{
+	    if (sscanf(
+		    *file_data,
+		    " %d %d%n",
+		    &e->one_vertex, &e->other_vertex, &consumed) != 2)
+	    {
                 return FALSE;
             }
 
-            if (ei->one_vertex > 0 ) ei->one_vertex--;
+	    *file_data += consumed;
 
-            if (!(section = parse_token(&line))) {
-                return FALSE;
-            }
-
-            if (sscanf(section, "%d%c", &(ei->other_vertex), &dummy) != 1) {
-                return FALSE;
-            }
-
-            if (ei->other_vertex > 0 ) ei->other_vertex--;
-
-            if (!(section = parse_token(&line))) {
-                return FALSE;
-            }
+            if (e->one_vertex > 0)
+	    {
+		e->one_vertex--;
+	    }
+            if (e->other_vertex > 0)
+	    {
+		e->other_vertex--;
+	    }
         }
 
-        do {
-            ntei = NEW_STRUCT(TetEdgeInfo);
-            for(i = 0; i < 8; i++ ) {
-                ntei->curves[i] = 0;
+	printf("Scanned vertex\n");
+
+	TetEdgeInfo * t = NULL;
+	
+        while (1)
+	{
+	    if (t)
+	    {
+		t = t->next = NEW_STRUCT(TetEdgeInfo);
+	    }
+	    else
+	    {
+		t = e->head = NEW_STRUCT(TetEdgeInfo);
+	    }
+	    
+            for(int i = 0; i < 8; i++ ) {
+                t->curves[i] = 0;
             }
 
-            if (ei->head==NULL) {
-                ei->head        = ntei;
-            } else {
-                tei->next       = ntei;
-            }
-
-            ntei->next = NULL;
-            tei = ntei;
-
-            if (sscanf(section, "%d%c%c%c",
-                       &tei->tet_index, &f1, &f2, &dummy) != 3) {
+	    char f1, f2;
+	    
+            if (sscanf(*file_data,
+		       "%d%c%c%n",
+                       &t->tet_index, &f1, &f2, &consumed) != 3) {
                 return FALSE;
             }
 
-            if (tei->tet_index > cf->num_tet) {
-                cf->num_tet = tei->tet_index;
+	    *file_data += consumed;
+	    
+            if (t->tet_index > cf->num_tet)
+	    {
+                cf->num_tet = t->tet_index;
             }
 
-            (tei->tet_index)--;
+            t->tet_index--;
 
             if ('u' <= f1 && f1 <= 'x') {
-                tei->f1 = f1 - 'u';
+                t->f1 = f1 - 'u';
             } else {
                 return FALSE;
             }
 
             if ('u' <= f2 && f2 <= 'x') {
-                tei->f2 = f2 - 'u';
+                t->f2 = f2 - 'u';
             } else {
                 return FALSE;
             }
 
-        } while ((section = parse_token(&line)));
+	    printf("Scanned first tet edge info %d %d\n", t->f1, t->f2);
+
+	    if (advance_my(file_data) == '\n')
+	    {
+		break;
+	    }
+        }
 
     } while ((line = parse_line(file_data)) && (section = parse_token(&line)));
 
+    
+    
     if (cf->type != not_attempted) {
         // Note that organizer.cpp returns early if the solution
         // type is not attempted.
@@ -219,7 +227,7 @@ static Boolean fill_casson_from_string_destructive(
 
         // Line 873 in organizer.cpp
 
-        ei = cf->head;
+        EdgeInfo * ei = cf->head;
         while(ei != NULL) {
             // Orb skips 1
             if (!(section = parse_token(&line))) {
@@ -276,7 +284,7 @@ static Boolean fill_casson_from_string_destructive(
         */
         line = parse_line_skipping_empty_lines(file_data);
 
-        ei = cf->head;
+        EdgeInfo * ei = cf->head;
         while(ei != NULL) {
             // Orb skips 1
             if (!(section = parse_token(&line))) {

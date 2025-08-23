@@ -215,22 +215,19 @@ void read_orb(
 {
     // Follows unit_kit/unix_file_io.c
 
-    FILE *fp;
-    long filesize;
-    char * buffer, * p;
-
-    fp = fopen(file_name, "rb");
+    FILE * fp = fopen(file_name, "rb");
     if (fp == NULL) {
         return;
     }
 
+    long filesize;
     if ( fseek(fp, 0, SEEK_END) != 0 ||
          (filesize = ftell(fp) ) == -1 ||
          fseek(fp, 0, SEEK_SET) != 0) {
         return;
     }
 
-    buffer = (char*) malloc(filesize + 1);
+    char * buffer = (char*) malloc(filesize + 1);
     buffer[filesize] = '\0';
 
     if ( fread(buffer, filesize, 1, fp) != 1) {

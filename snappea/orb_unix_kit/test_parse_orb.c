@@ -1,6 +1,5 @@
 #include "parse_orb.h"
 
-#include "casson.h"
 #include "diagram.h"
 #include "diagram_to_graph.h"
 

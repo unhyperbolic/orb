@@ -1,7 +1,6 @@
 #ifndef _parse_orb_
 #define _parse_orb_
 
-#include "casson_typedefs.h"
 #include "diagram_typedefs.h"
 
 #include "SnapPea.h"

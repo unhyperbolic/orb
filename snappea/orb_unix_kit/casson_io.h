@@ -3,9 +3,6 @@
 
 #include "SnapPea.h"
 
-#include "casson.h"
-
 Triangulation * read_casson_format(char ** str);
-
 
 #endif

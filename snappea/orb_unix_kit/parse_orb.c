@@ -2,7 +2,6 @@
 
 #include "parse_orb.h"
 
-#include "casson.h"
 #include "casson_io.h"
 #include "diagram.h"
 

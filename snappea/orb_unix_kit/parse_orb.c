@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>
 
 /* What is happening in gui code:
 
@@ -54,14 +55,18 @@ static SolutionType string_to_solution_type(char *s)
     return not_attempted;
 }
 
-char
+Boolean
 advance_my(char **string)
 {
-    while (**string == ' ')
+    while (isspace(**string))
     {
+	if (**string == '\n')
+	{
+	    return TRUE;
+	}
 	(*string)++;
     }
-    return **string;
+    return FALSE;
 }
 
 static Boolean fill_casson_from_string_destructive(
@@ -104,7 +109,7 @@ static Boolean fill_casson_from_string_destructive(
     
     EdgeInfo *e = NULL;
 
-    do
+    while (1)
     {
 	if (e)
 	{
@@ -151,7 +156,7 @@ static Boolean fill_casson_from_string_destructive(
 	    }
         }
 
-	printf("Scanned vertex\n");
+	printf("Scanning edge\n");
 
 	TetEdgeInfo * t = NULL;
 	
@@ -199,17 +204,21 @@ static Boolean fill_casson_from_string_destructive(
                 return FALSE;
             }
 
-	    printf("Scanned first tet edge info %d %d\n", t->f1, t->f2);
+	    printf("Scanned tet edge info %d %d\n", t->f1, t->f2);
 
-	    if (advance_my(file_data) == '\n')
+	    if (advance_my(file_data))
 	    {
 		break;
 	    }
         }
 
-    } while ((line = parse_line(file_data)) && (section = parse_token(&line)));
+	(*file_data)++;
 
-    
+	if (advance_my(file_data))
+	{
+	    break;
+	}
+    }
     
     if (cf->type != not_attempted) {
         // Note that organizer.cpp returns early if the solution
@@ -219,99 +228,62 @@ static Boolean fill_casson_from_string_destructive(
         // The peripheral curves are always there
         // (every call to saveTriangulation says so).
 
-        line = parse_line_skipping_empty_lines(file_data);
+	for (EdgeInfo * e = cf->head; e != NULL; e = e->next)
+	{
+	    int index;
+	    if (sscanf(*file_data,
+		       " %d %lf %lf %lf%n",
+		       &index,
+		       &e->e_inner_product,
+		       &e->v_inner_product1,
+		       &e->v_inner_product2,
+		       &consumed) != 4)
+	    {
+		return FALSE;
+	    }
+	    *file_data += consumed;
 
-//        if (!( section = parse_token_next_non_empty_line(file_data, &line))) {
-//            return FALSE;
-//        }
-
+	    for (TetEdgeInfo * t = e->head; t != NULL; t = t->next)
+	    {
+		if (sscanf(*file_data, " %lf%n", &t->dihedral_angle, &consumed) != 1)
+		{
+		    return FALSE;
+		}
+		*file_data += consumed;
+		printf("%f\n", t->dihedral_angle);
+	    }
+	    
+	    printf("E\n");
+	}
+	
         // Line 873 in organizer.cpp
-
-        EdgeInfo * ei = cf->head;
-        while(ei != NULL) {
-            // Orb skips 1
-            if (!(section = parse_token(&line))) {
-                return FALSE;
-            }
-
-            if (!(section = parse_token(&line))) {
-                return FALSE;
-            }
-
-            if (sscanf(section, "%lf%c", &(ei->e_inner_product), &dummy) != 1) {
-                return FALSE;
-            }
-
-            if (!(section = parse_token(&line))) {
-                return FALSE;
-            }
-
-            if (sscanf(section, "%lf%c", &(ei->v_inner_product1), &dummy) != 1) {
-                return FALSE;
-            }
-
-            if (!(section = parse_token(&line))) {
-                return FALSE;
-            }
-
-            if (sscanf(section, "%lf%c", &(ei->v_inner_product2), &dummy) != 1) {
-                return FALSE;
-            }
-
-            tei = ei->head;
-            while( tei != NULL) {
-                if (!(section = parse_token(&line))) {
-                    return FALSE;
-                }
-
-                if (sscanf(section, "%lf%c", &(tei->dihedral_angle), &dummy) != 1) {
-                    return FALSE;
-                }
-
-                tei = tei->next;
-            }
-
-            ei = ei->next;
-            line = parse_line(file_data);
-        }
     }
 
     if (cf->vertices_known) {
-        /*
-        if (!line) {
-            return FALSE;
-        }
-        */
-        line = parse_line_skipping_empty_lines(file_data);
+	for (EdgeInfo * e = cf->head; e != NULL; e = e->next)
+	{
+	    int index;
+	    if (sscanf(*file_data, " %d%n", &index, &consumed) != 1)
+	    {
+		return FALSE;
+	    }
+	    *file_data += consumed;
 
-        EdgeInfo * ei = cf->head;
-        while(ei != NULL) {
-            // Orb skips 1
-            if (!(section = parse_token(&line))) {
-                return FALSE;
-            }
-
-            tei = ei->head;
-            while( tei != NULL) {
-                for (i = 0; i < 8; i++) {
-                    if (!(section = parse_token(&line))) {
-                        return FALSE;
-                    }
-
-                    if (sscanf(section, "%d%s", &(tei->curves[i]), &dummy) != 1) {
-                        return FALSE;
-                    }
-                }
-
-                tei = tei->next;
-            }
-
-            ei = ei->next;
-            line = parse_line(file_data);
-        }
-
+	    for (TetEdgeInfo * t = e->head; t != NULL; t = t->next)
+	    {
+                for (int i = 0; i < 8; i++)
+		{
+		    if (sscanf(*file_data, " %d%n", &t->curves[i], &consumed) != 1) {
+			return FALSE;
+		    }
+		    *file_data += consumed;
+		}
+	    }
+	}
     }
 
+    printf("Scanned\n");
+    
     return TRUE;
 }
 
@@ -465,6 +437,7 @@ static Boolean has_non_whitespace(
         if (*l != ' ' && *l != '\t' && *l != '\n' && *l != '\r') {
             return TRUE;
         }
+	l++;
     }
 
     return FALSE;

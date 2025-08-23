@@ -4,9 +4,9 @@ CFLAGS= -c -g -Wall -I../headers
 SRCS = ${wildcard *.c}
 OBJS= ${SRCS:%.c=%.o}
 
-all: graph_complement.o casson.o test_parse_util test_parse_orb
+all: graph_complement.o test_parse_util test_parse_orb
 
-test_parse_orb: test_parse_orb.o parse_orb.o casson.o parse_util.o diagram.o diagram_to_graph.o triangulation_io.o graph_complement.o casson_io.o ../code/liborb.a
+test_parse_orb: test_parse_orb.o parse_orb.o parse_util.o diagram.o diagram_to_graph.o triangulation_io.o graph_complement.o casson_io.o ../code/liborb.a
 	gcc triangulation_io.o test_parse_orb.o parse_orb.o parse_util.o diagram.o diagram_to_graph.o ../code/*.o graph_complement.o casson_io.o -lm -o test_parse_orb
 
 test_parse_util: test_parse_util.o parse_util.o

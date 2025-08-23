@@ -56,7 +56,7 @@ static SolutionType string_to_solution_type(char *s)
 }
 
 Boolean
-advance_my(char **string)
+is_new_line_after_skipping_blanks(char **string)
 {
     while (isspace(**string))
     {
@@ -73,14 +73,6 @@ static Boolean fill_casson_from_string_destructive(
         CassonFormat *cf,
         char **file_data)
 {
-    int             i;
-    char            *line,
-                    *section;
-    TetEdgeInfo     *ntei = NULL,
-                    *tei = NULL;
-    char            f1, f2;
-    char            dummy;
-
     cf->head = NULL;
     cf->num_tet = 0;
     cf->vertices_known = FALSE;
@@ -206,7 +198,7 @@ static Boolean fill_casson_from_string_destructive(
 
 	    printf("Scanned tet edge info %d %d\n", t->f1, t->f2);
 
-	    if (advance_my(file_data))
+	    if (is_new_line_after_skipping_blanks(file_data))
 	    {
 		break;
 	    }
@@ -214,7 +206,7 @@ static Boolean fill_casson_from_string_destructive(
 
 	(*file_data)++;
 
-	if (advance_my(file_data))
+	if (is_new_line_after_skipping_blanks(file_data))
 	{
 	    break;
 	}

@@ -1,5 +1,5 @@
 #include "diagram.h"
-#include "graph_complement.h"
+#include "graph.h"
 
 /* for my_free */
 #include "kernel.h"
@@ -946,3 +946,15 @@ Graph * diagram_to_graph(Diagram * diagram)
     return graph;
 }
 
+Triangulation * diagram_complement(Diagram *diagram, Boolean remove_vertices)
+{
+    Triangulation * t = NULL;
+    
+    Graph * g = diagram_to_graph(diagram);
+    if (g != NULL)
+    {
+	t = triangulate_graph_complement(g, remove_vertices);
+    }
+    free_graph(g);
+    return t;
+}

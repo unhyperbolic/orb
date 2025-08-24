@@ -1,8 +1,9 @@
-#include <stdio.h>
-#include "kernel.h"
-#include "graph_complement.h"
+#include "graph.h"
 
-void     free_graph( Graph *gamma );
+#include "kernel.h"
+
+#include <stdio.h>
+
 Triangulation    *triangulate_graph_complement( Graph *gamma, Boolean remove_vertices );
 void dump_triangulation( Triangulation *manifold );
 void             identify_cusps( Triangulation *);
@@ -58,8 +59,6 @@ extern Triangulation	*triangulate_graph_complement(
  /* note: all although identify_cusp reindex everything, it does it in a way consistent with the previous indices */
  identify_cusps( manifold );
  add_peripheral_curves( gamma );
-
- free_graph( gamma );
 
  if (remove_vertices)
  	remove_finite_vertices( manifold );

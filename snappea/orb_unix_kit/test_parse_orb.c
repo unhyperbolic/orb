@@ -4,8 +4,6 @@
 
 #include "triangulation_io.h"
 
-#include "graph_complement.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -28,11 +26,7 @@ int main(int argc, char **argv)
 
     if (diagram) {
         printf("Status: Got diagram\n");
-	Graph * graph = diagram_to_graph(diagram);
-	if (graph) {
-	    printf("Num comp graph %d\n", graph->num_components);
-	}
-	Triangulation *tri = triangulate_graph_complement(graph, FALSE);
+	Triangulation * tri = diagram_complement(diagram, FALSE);
 	if (tri) {
 	    printf("Triangulation\n%s\n", triangulation_to_string(tri, TRUE, TRUE, TRUE));
 	}

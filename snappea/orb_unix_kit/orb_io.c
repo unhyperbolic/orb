@@ -87,7 +87,7 @@ void read_orb_from_string(
 	return;
     }
 
-    *diagram = read_diagram(p);
+    *diagram = read_diagram_from_string(p);
 }
 
 void read_orb(

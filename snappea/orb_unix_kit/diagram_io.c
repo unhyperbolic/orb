@@ -116,7 +116,7 @@ static Boolean fill_diagram(
     return TRUE;
 }
 
-Diagram *read_diagram(
+Diagram *read_diagram_from_string(
     char * file_data)
 {
     Diagram *diagram = NEW_STRUCT(Diagram);

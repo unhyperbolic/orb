@@ -3,6 +3,6 @@
 
 typedef struct Diagram Diagram;
 
-Diagram * read_diagram(char *str);
+Diagram * read_diagram_from_string(char *str);
 
 #endif

@@ -1,9 +1,10 @@
 #include "orb_io.h"
 
 #include "diagram.h"
-#include "diagram_to_graph.h"
 
 #include "triangulation_io.h"
+
+#include "graph_complement.h"
 
 #include <stdio.h>
 #include <stdlib.h>

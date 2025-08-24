@@ -14,14 +14,12 @@ enum DiagramEndType
     diagramBegin = 0,
     diagramEnd
 };
-typedef enum DiagramEndType DiagramEndType;
 
 enum DiagramEdgeType
 {
     diagramSingular = 0,
     diagramDrilled
 };
-typedef enum DiagramEdgeType DiagramEdgeType;
 
 struct DiagramEndData
 {

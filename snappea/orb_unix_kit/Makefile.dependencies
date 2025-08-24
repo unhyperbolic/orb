@@ -1,13 +1,32 @@
-casson.o: casson.c ../headers/kernel.h ../headers/SnapPea.h \
+casson_io.o: casson_io.c casson_io.h ../headers/SnapPea.h \
  ../headers/winged_edge.h ../headers/tersest_triangulation.h \
  ../headers/link_projection.h ../headers/triangulation_io.h \
- ../headers/covers.h ../headers/kernel_typedefs.h \
+ ../headers/covers.h ../headers/kernel.h ../headers/SnapPea.h \
+ ../headers/kernel_typedefs.h ../headers/triangulation.h \
+ ../headers/positioned_tet.h ../headers/isometry.h ../headers/kernel.h \
+ ../headers/symmetry_group.h ../headers/dual_one_skeleton_curve.h \
+ ../headers/terse_triangulation.h ../headers/kernel_prototypes.h \
+ ../headers/tables.h ../headers/one_skeleton_curve.h
+diagram.o: diagram.c diagram.h diagram_typedefs.h \
+ ../headers/kernel_typedefs.h ../headers/SnapPea.h \
+ ../headers/winged_edge.h ../headers/tersest_triangulation.h \
+ ../headers/link_projection.h ../headers/triangulation_io.h \
+ ../headers/covers.h ../headers/kernel.h ../headers/kernel_typedefs.h \
  ../headers/triangulation.h ../headers/positioned_tet.h \
  ../headers/isometry.h ../headers/kernel.h ../headers/symmetry_group.h \
  ../headers/dual_one_skeleton_curve.h ../headers/terse_triangulation.h \
  ../headers/kernel_prototypes.h ../headers/tables.h \
- ../headers/one_skeleton_curve.h \
- ../headers/kernel_typedefs.h
+ ../headers/one_skeleton_curve.h ../headers/SnapPea.h
+diagram_to_graph.o: diagram_to_graph.c diagram_to_graph.h diagram.h \
+ diagram_typedefs.h ../headers/kernel_typedefs.h ../headers/SnapPea.h \
+ ../headers/winged_edge.h ../headers/tersest_triangulation.h \
+ ../headers/link_projection.h ../headers/triangulation_io.h \
+ ../headers/covers.h graph_complement.h ../headers/kernel.h \
+ ../headers/kernel_typedefs.h ../headers/triangulation.h \
+ ../headers/positioned_tet.h ../headers/isometry.h ../headers/kernel.h \
+ ../headers/symmetry_group.h ../headers/dual_one_skeleton_curve.h \
+ ../headers/terse_triangulation.h ../headers/kernel_prototypes.h \
+ ../headers/tables.h ../headers/one_skeleton_curve.h
 graph2manifold.o: graph2manifold.c graph_complement.h ../headers/kernel.h \
  ../headers/SnapPea.h ../headers/winged_edge.h \
  ../headers/tersest_triangulation.h ../headers/link_projection.h \
@@ -26,6 +45,15 @@ graph_complement.o: graph_complement.c ../headers/kernel.h \
  ../headers/symmetry_group.h ../headers/dual_one_skeleton_curve.h \
  ../headers/terse_triangulation.h ../headers/kernel_prototypes.h \
  ../headers/tables.h ../headers/one_skeleton_curve.h graph_complement.h
+ostream.o: ostream.c ostream.h ../headers/kernel.h ../headers/SnapPea.h \
+ ../headers/winged_edge.h ../headers/tersest_triangulation.h \
+ ../headers/link_projection.h ../headers/triangulation_io.h \
+ ../headers/covers.h ../headers/kernel_typedefs.h \
+ ../headers/triangulation.h ../headers/positioned_tet.h \
+ ../headers/isometry.h ../headers/kernel.h ../headers/symmetry_group.h \
+ ../headers/dual_one_skeleton_curve.h ../headers/terse_triangulation.h \
+ ../headers/kernel_prototypes.h ../headers/tables.h \
+ ../headers/one_skeleton_curve.h
 parse_orb.o: parse_orb.c ../headers/kernel.h ../headers/SnapPea.h \
  ../headers/winged_edge.h ../headers/tersest_triangulation.h \
  ../headers/link_projection.h ../headers/triangulation_io.h \
@@ -34,12 +62,28 @@ parse_orb.o: parse_orb.c ../headers/kernel.h ../headers/SnapPea.h \
  ../headers/isometry.h ../headers/kernel.h ../headers/symmetry_group.h \
  ../headers/dual_one_skeleton_curve.h ../headers/terse_triangulation.h \
  ../headers/kernel_prototypes.h ../headers/tables.h \
- ../headers/one_skeleton_curve.h parse_orb.h \
- ../headers/kernel_typedefs.h parse_util.h
+ ../headers/one_skeleton_curve.h parse_orb.h diagram_typedefs.h \
+ ../headers/kernel_typedefs.h ../headers/SnapPea.h casson_io.h diagram.h \
+ parse_util.h
 parse_util.o: parse_util.c parse_util.h
-test_parse_orb.o: test_parse_orb.c parse_orb.h \
+parsing_exercises.o: parsing_exercises.c
+test_parse_orb.o: test_parse_orb.c parse_orb.h diagram_typedefs.h \
  ../headers/kernel_typedefs.h ../headers/SnapPea.h \
  ../headers/winged_edge.h ../headers/tersest_triangulation.h \
  ../headers/link_projection.h ../headers/triangulation_io.h \
- ../headers/covers.h 
+ ../headers/covers.h ../headers/SnapPea.h diagram.h diagram_to_graph.h \
+ graph_complement.h ../headers/kernel.h ../headers/kernel_typedefs.h \
+ ../headers/triangulation.h ../headers/positioned_tet.h \
+ ../headers/isometry.h ../headers/kernel.h ../headers/symmetry_group.h \
+ ../headers/dual_one_skeleton_curve.h ../headers/terse_triangulation.h \
+ ../headers/kernel_prototypes.h ../headers/tables.h \
+ ../headers/one_skeleton_curve.h triangulation_io.h \
+ ../headers/triangulation.h
 test_parse_util.o: test_parse_util.c parse_util.h
+triangulation_io.o: triangulation_io.c triangulation_io.h \
+ ../headers/triangulation.h ../headers/SnapPea.h ../headers/winged_edge.h \
+ ../headers/tersest_triangulation.h ../headers/link_projection.h \
+ ../headers/triangulation_io.h ../headers/covers.h \
+ ../headers/kernel_typedefs.h ../headers/positioned_tet.h \
+ ../headers/triangulation.h ../headers/kernel_prototypes.h \
+ ../headers/positioned_tet.h ../headers/tables.h

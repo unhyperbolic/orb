@@ -1,6 +1,6 @@
 #include "kernel.h"
 
-#include "parse_orb.h"
+#include "orb_io.h"
 
 #include "casson_io.h"
 #include "diagram_io.h"
@@ -33,7 +33,6 @@
 
 void read_orb_from_string(
         char *str,
-        char ** name,
         Triangulation ** trig,
 	Diagram ** diagram)
 {
@@ -53,9 +52,12 @@ void read_orb_from_string(
         return;
     }
 
-    *name = my_strdup(l);
-    
     *trig = read_casson_format(&p);
+
+    if (*trig)
+    {
+	(*trig)->name = my_strdup(l);
+    }
 
     while (isspace(*p))
     {
@@ -72,7 +74,6 @@ void read_orb_from_string(
 
 void read_orb(
         const char *file_name,
-        char **name,
 	Triangulation ** trig,
 	Diagram ** diagram)
 {
@@ -98,7 +99,7 @@ void read_orb(
         return;
     }
 
-    read_orb_from_string(buffer, name, trig, diagram);
+    read_orb_from_string(buffer, trig, diagram);
 
     free(buffer);
 }

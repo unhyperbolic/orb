@@ -1,4 +1,4 @@
-#include "parse_orb.h"
+#include "orb_io.h"
 
 #include "diagram.h"
 #include "diagram_to_graph.h"
@@ -10,7 +10,6 @@
 
 int main(int argc, char **argv)
 {
-    char *name = NULL;
     Diagram * diagram = NULL;
     Triangulation * trig = NULL;
     Boolean ok = FALSE;
@@ -20,14 +19,10 @@ int main(int argc, char **argv)
 	exit(1);
     }
 
-    read_orb(argv[1], &name, &trig, &diagram);
+    read_orb(argv[1], &trig, &diagram);
 
     if (trig) {
-        printf("Status: Got it\n");
-    }
-
-    if (name) {
-        printf("Status: Name: %s\n", name);
+        printf("Status: Got trig %s\n", trig->name);
     }
 
     if (diagram) {

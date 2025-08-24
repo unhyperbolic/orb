@@ -1,11 +1,9 @@
-#include "kernel.h"
-
 #include "orb_io.h"
 
 #include "casson_io.h"
 #include "diagram_io.h"
 
-#include "parse_util.h"
+#include "kernel.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -30,45 +28,65 @@
 
 */
 
+static Boolean is_eol_char(char c){
+    return c == '\n' ||  c == '\r' || c == '\0';
+}
 
 void read_orb_from_string(
         char *str,
         Triangulation ** trig,
 	Diagram ** diagram)
 {
-    char * l;
+    char * p = str;
 
-    char *p = str;
-
-    printf("Here\n");
-    
-    l = parse_line(&p);
-    if (!l || strcmp(l, "% orb") != 0) {
-        return;
-    }
-
-    l = parse_line(&p);
-    if (!l) {
-        return;
-    }
-
-    *trig = read_casson_format(&p);
-
-    if (*trig)
-    {
-	(*trig)->name = my_strdup(l);
-    }
-
-    while (isspace(*p))
+    /*
+     * Read and ignore the header (% orb).
+     */
+    while (!is_eol_char(*p))
     {
 	p++;
     }
 
+    /*
+     * Find first non-empty line.
+     */
+
+    while (is_eol_char(*p) && *p != '\0')
+    {
+	p++;
+    }
+
+    char * name_start = p;
+    while (!is_eol_char(*p))
+    {
+	p++;
+    }
+    size_t name_length = p - name_start;
+
+    printf("casson: %s\n", p);
+    
+    *trig = read_casson_format(&p);
+
+    if (*trig && name_length > 0)
+    {
+	(*trig)->name = (char*) my_malloc(name_length + 1);
+	if ((*trig)->name == NULL)
+	{
+	    // uFatalError
+	    return;
+	}
+	memcpy((*trig)->name, name_start, name_length);
+	(*trig)->name[name_length] = '\0';
+    }
+    while (isspace(*p))
+    {
+	p++;
+    }
     if (*p == '\0')
     {
 	return;
     }
-    
+
     *diagram = read_diagram(p);
 }
 

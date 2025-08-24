@@ -34,16 +34,16 @@ graph.o: graph.c graph.h ../headers/kernel.h ../headers/SnapPea.h \
  ../headers/dual_one_skeleton_curve.h ../headers/terse_triangulation.h \
  ../headers/kernel_prototypes.h ../headers/tables.h \
  ../headers/one_skeleton_curve.h
-orb_io.o: orb_io.c ../headers/kernel.h ../headers/SnapPea.h \
+orb_io.o: orb_io.c orb_io.h diagram.h ../headers/SnapPea.h \
  ../headers/winged_edge.h ../headers/tersest_triangulation.h \
  ../headers/link_projection.h ../headers/triangulation_io.h \
- ../headers/covers.h ../headers/kernel_typedefs.h \
+ ../headers/covers.h casson_io.h diagram_io.h ../headers/kernel.h \
+ ../headers/SnapPea.h ../headers/kernel_typedefs.h \
  ../headers/triangulation.h ../headers/positioned_tet.h \
  ../headers/isometry.h ../headers/kernel.h ../headers/symmetry_group.h \
  ../headers/dual_one_skeleton_curve.h ../headers/terse_triangulation.h \
  ../headers/kernel_prototypes.h ../headers/tables.h \
- ../headers/one_skeleton_curve.h orb_io.h diagram.h ../headers/SnapPea.h \
- casson_io.h diagram_io.h parse_util.h
+ ../headers/one_skeleton_curve.h
 ostream.o: ostream.c ostream.h ../headers/kernel.h ../headers/SnapPea.h \
  ../headers/winged_edge.h ../headers/tersest_triangulation.h \
  ../headers/link_projection.h ../headers/triangulation_io.h \
@@ -53,10 +53,13 @@ ostream.o: ostream.c ostream.h ../headers/kernel.h ../headers/SnapPea.h \
  ../headers/dual_one_skeleton_curve.h ../headers/terse_triangulation.h \
  ../headers/kernel_prototypes.h ../headers/tables.h \
  ../headers/one_skeleton_curve.h
-parse_util.o: parse_util.c parse_util.h
-parsing_exercises.o: parsing_exercises.c
-test_parse_orb.o: test_parse_orb.c orb_io.h diagram.h \
+test_parse_orb.o: test_parse_orb.c ../headers/kernel.h \
  ../headers/SnapPea.h ../headers/winged_edge.h \
  ../headers/tersest_triangulation.h ../headers/link_projection.h \
- ../headers/triangulation_io.h ../headers/covers.h casson_io.h
-test_parse_util.o: test_parse_util.c parse_util.h
+ ../headers/triangulation_io.h ../headers/covers.h \
+ ../headers/kernel_typedefs.h ../headers/triangulation.h \
+ ../headers/positioned_tet.h ../headers/isometry.h ../headers/kernel.h \
+ ../headers/symmetry_group.h ../headers/dual_one_skeleton_curve.h \
+ ../headers/terse_triangulation.h ../headers/kernel_prototypes.h \
+ ../headers/tables.h ../headers/one_skeleton_curve.h orb_io.h diagram.h \
+ ../headers/SnapPea.h casson_io.h

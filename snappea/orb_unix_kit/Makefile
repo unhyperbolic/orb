@@ -4,13 +4,10 @@ CFLAGS= -c -g -Wall -I../headers
 SRCS = ${wildcard *.c}
 OBJS= ${SRCS:%.c=%.o}
 
-all: graph.o test_parse_util test_parse_orb
+all: test_parse_orb
 
-test_parse_orb: test_parse_orb.o orb_io.o parse_util.o diagram.o graph.o casson_io.o diagram_io.o ../code/liborb.a
-	gcc test_parse_orb.o orb_io.o parse_util.o diagram.o ../code/*.o graph.o casson_io.o diagram_io.o -lm -o test_parse_orb
-
-test_parse_util: test_parse_util.o parse_util.o
-	gcc test_parse_util.o parse_util.o -o test_parse_util
+test_parse_orb: test_parse_orb.o orb_io.o diagram.o graph.o casson_io.o diagram_io.o ../code/liborb.a
+	gcc test_parse_orb.o orb_io.o diagram.o ../code/*.o graph.o casson_io.o diagram_io.o -lm -o test_parse_orb
 
 %.o: %.c
 	gcc ${CFLAGS} $*.c -o $@

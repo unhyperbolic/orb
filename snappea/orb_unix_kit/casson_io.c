@@ -132,8 +132,6 @@ static Boolean fill_casson_struct(
 	*str += consumed;
     }
 
-    printf("F\n");
-
     EdgeInfo *e = NULL;
 
     while (1)
@@ -184,8 +182,6 @@ static Boolean fill_casson_struct(
 	    }
         }
 
-	printf("Scanning edge\n");
-
 	TetEdgeInfo * t = NULL;
 
         while (1)
@@ -231,8 +227,6 @@ static Boolean fill_casson_struct(
                 return FALSE;
             }
 
-	    printf("Scanned tet edge info %d %d\n", t->f1, t->f2);
-
 	    if (skip_blanks(str))
 	    {
 		break;
@@ -276,10 +270,8 @@ static Boolean fill_casson_struct(
 		    return FALSE;
 		}
 		*str += consumed;
-		printf("%f\n", t->dihedral_angle);
 	    }
 
-	    printf("E\n");
 	}
 
         // Line 873 in organizer.cpp
@@ -309,8 +301,6 @@ static Boolean fill_casson_struct(
 	    }
 	}
     }
-
-    printf("Scanned\n");
 
     return TRUE;
 }
@@ -394,28 +384,28 @@ void free_casson(CassonFormat *cf)
 
     EdgeInfo *e1, *e2;
     TetEdgeInfo *t1, *t2;
-    
+
     if (cf == NULL)
         return;
-    
+
     e1 = cf->head;
-    
+
     while (e1!=NULL)
     {
         e2 = e1->next;
         t1 = e1->head;
-        
+
         while (t1!=NULL)
         {
             t2 = t1->next;
             my_free(t1);
             t1 = t2;
         }
-        
+
         my_free(e1);
         e1 = e2;
     }
-    
+
     my_free(cf);
 }
 
@@ -516,7 +506,7 @@ Triangulation *casson_to_triangulation( CassonFormat *cf )
 		EdgeClass *edge = tet_array[t1]->edge_class[index];
 
 		edge->inner_product[ultimate]	= ei->e_inner_product;
-		edge->inner_product[penultimate]= ei->e_inner_product; 
+		edge->inner_product[penultimate]= ei->e_inner_product;
 
 		tet_array[t1]->cusp[remaining_face[a1][a2]]->inner_product[ultimate]
 						= ei->v_inner_product1;
@@ -624,7 +614,7 @@ Triangulation *casson_to_triangulation( CassonFormat *cf )
 
 		ei = ei->next;
 	}
-	
+
 
 	orient(manifold);
 	my_free( tet_array );
@@ -642,8 +632,6 @@ Triangulation *casson_to_triangulation( CassonFormat *cf )
 Triangulation * read_casson_format(
     char ** str)
 {
-    printf("read_casson_format\n");
-    
     CassonFormat * cf = read_casson_struct(str);
     if (cf == NULL)
     {
@@ -672,7 +660,7 @@ write_casson_format_to_string(
     char * buffer = my_malloc(10000000);
 
     char * p = buffer;
-    
+
 	int		index;
 	Tetrahedron	*tet;
 	EdgeClass	*edge;
@@ -728,7 +716,7 @@ write_casson_format_to_string(
 	}
 
 	for (	edge = manifold->edge_list_begin.next, index = 1;
-		edge!=&manifold->edge_list_end;		
+		edge!=&manifold->edge_list_end;
 		edge = edge->next, index++)
 	{
 	    p += sprintf(p, "%3d %2d", index, edge->singular_index + 1);
@@ -737,7 +725,7 @@ write_casson_format_to_string(
 
 	    set_left_edge(edge,&ptet0);
 	    ptet = ptet0;
-	    
+
 	    if (ae)
 	    {
 			double err =  (edge->singular_order==0)
@@ -770,7 +758,7 @@ write_casson_format_to_string(
 			char d = NL(ptet.near_face);
 
 			p += sprintf(p, " %2d%c%c",ptet.tet->index,c,d);
-	
+
 			veer_left(&ptet);
 
 		}while (!same_positioned_tet(&ptet, &ptet0));
@@ -810,7 +798,7 @@ write_casson_format_to_string(
 		}
 	}
 
-	if (ex && curves )	
+	if (ex && curves )
 	{
                 p += sprintf(p, "\n");
 

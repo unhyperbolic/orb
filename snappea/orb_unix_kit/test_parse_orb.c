@@ -1,8 +1,9 @@
+#include "kernel.h"
+
 #include "orb_io.h"
+#include "casson_io.h"
 
 #include "diagram.h"
-
-#include "triangulation_io.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,7 +29,7 @@ int main(int argc, char **argv)
         printf("Status: Got diagram\n");
 	Triangulation * tri = diagram_complement(diagram, FALSE);
 	if (tri) {
-	    printf("Triangulation\n%s\n", triangulation_to_string(tri, TRUE, TRUE, TRUE));
+	    printf("Triangulation\n%s\n", write_casson_format_to_string(tri, TRUE, TRUE, TRUE));
 	}
     }
 

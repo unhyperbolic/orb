@@ -58,14 +58,5 @@ parsing_exercises.o: parsing_exercises.c
 test_parse_orb.o: test_parse_orb.c orb_io.h diagram.h \
  ../headers/SnapPea.h ../headers/winged_edge.h \
  ../headers/tersest_triangulation.h ../headers/link_projection.h \
- ../headers/triangulation_io.h ../headers/covers.h triangulation_io.h \
- ../headers/triangulation.h ../headers/SnapPea.h \
- ../headers/kernel_typedefs.h
+ ../headers/triangulation_io.h ../headers/covers.h casson_io.h
 test_parse_util.o: test_parse_util.c parse_util.h
-triangulation_io.o: triangulation_io.c triangulation_io.h \
- ../headers/triangulation.h ../headers/SnapPea.h ../headers/winged_edge.h \
- ../headers/tersest_triangulation.h ../headers/link_projection.h \
- ../headers/triangulation_io.h ../headers/covers.h \
- ../headers/kernel_typedefs.h ../headers/positioned_tet.h \
- ../headers/triangulation.h ../headers/kernel_prototypes.h \
- ../headers/positioned_tet.h ../headers/tables.h

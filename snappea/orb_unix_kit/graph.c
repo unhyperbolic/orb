@@ -567,8 +567,7 @@ static void	add_nugatory_crossing(
  gamma->num_meetings++;
 }
 
-
-
+#define PERMUTATION2310 0xB4
 
 static Triangulation	*create_basic_triangulation(
  	Graph *gamma)

@@ -3,23 +3,19 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
-#include "kernel.h"
-#define PERMUTATION2310 0xB4
-
-typedef int MeetingType;
-enum 
-{
- 	Cross = 0,
- 	Inter = 1
-};
-
+#include "SnapPea.h"
 
 typedef struct Graph Graph;
 typedef struct GraphMeeting GraphMeeting;
 
-struct Graph 
+Triangulation *triangulate_graph_complement( Graph *gamma, Boolean remove_vertices );
+void free_graph( Graph *gamma );
+
+typedef struct Tetrahedron Tetrahedron;
+
+struct Graph
 {
  	int num_meetings; /* Number of GraphMeetings in the projection */
 
@@ -30,6 +26,12 @@ struct Graph
  	GraphMeeting *meeting; /* contains all the meetings in the Graph */
 };
 
+typedef int MeetingType;
+enum
+{
+ 	Cross = 0,
+ 	Inter = 1
+};
 
 struct GraphMeeting
 {
@@ -39,7 +41,7 @@ struct GraphMeeting
  	/* Number of strands leaving the meeting.  For a crossing the number is always four*/
  	int num_strands;
 
- 	
+
  	int handedness; /* This variable is used to help calculate the handedness of crossings */
 
  	int *strand; /* strand[i] is the strand you end up on if you the the meeting on strand i */
@@ -49,7 +51,7 @@ struct GraphMeeting
  	int *label; /* label[i] is the label on strand i.  For example a pillowcase cusp may have four
  			strands labeled 2.  If strand i is labelled infinity then label[i] is set to 1 */
 
- 	Boolean visited; 
+ 	Boolean visited;
 
  	Tetrahedron **tet; /* At a crossing there are four tetrahedra, one in each crossing.  The ith
  				tetrahedron lies above the ith strand.  At an intersection the number of
@@ -60,12 +62,8 @@ struct GraphMeeting
  	int *neighbor;  /* Following strand i out the the meeting takes you to the meeting indexed neighbor[i] */
 };
 
-void     free_graph( Graph *gamma );
-
-Triangulation    *triangulate_graph_complement( Graph *gamma, Boolean remove_vertices );
-    
 #ifdef __cplusplus
 }
-#endif 
+#endif
 
 #endif

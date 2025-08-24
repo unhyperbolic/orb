@@ -45,7 +45,7 @@ DiagramCrossing * get_next_crossing(DiagramEdge *e, DiagramCrossing *c);
 DiagramCrossing * get_prev_crossing(DiagramEdge *e, DiagramCrossing *c);
 
 Graph * diagram_to_graph(Diagram *);
-Triangulation * diagram_complement(Diagram *, Boolean remove_vertices);
+Triangulation * triangulate_diagram_complement(Diagram *, Boolean remove_vertices);
 
 enum DiagramEndType
 {

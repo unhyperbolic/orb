@@ -946,7 +946,8 @@ Graph * diagram_to_graph(Diagram * diagram)
     return graph;
 }
 
-Triangulation * diagram_complement(Diagram *diagram, Boolean remove_vertices)
+Triangulation *
+triangulate_diagram_complement(Diagram *diagram, Boolean remove_vertices)
 {
     Triangulation * t = NULL;
     

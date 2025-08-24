@@ -27,7 +27,7 @@ int main(int argc, char **argv)
 
     if (diagram) {
         printf("Status: Got diagram\n");
-	Triangulation * tri = diagram_complement(diagram, FALSE);
+	Triangulation * tri = triangulate_diagram_complement(diagram, FALSE);
 	if (tri) {
 	    printf("Triangulation\n%s\n", write_casson_format_to_string(tri, TRUE, TRUE, TRUE));
 	}

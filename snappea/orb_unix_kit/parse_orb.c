@@ -31,19 +31,6 @@
 */
 
 
-static Boolean has_non_whitespace(
-        char *l)
-{
-    while (l) {
-        if (*l != ' ' && *l != '\t' && *l != '\n' && *l != '\r') {
-            return TRUE;
-        }
-	l++;
-    }
-
-    return FALSE;
-}
-
 void read_orb_from_string(
         char *str,
         char ** name,
@@ -70,9 +57,17 @@ void read_orb_from_string(
     
     *trig = read_casson_format(&p);
 
-    if (has_non_whitespace(p)) {
-        *diagram = read_diagram(p);
+    while (isspace(*p))
+    {
+	p++;
     }
+
+    if (*p == '\0')
+    {
+	return;
+    }
+    
+    *diagram = read_diagram(p);
 }
 
 void read_orb(

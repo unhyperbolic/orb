@@ -4,6 +4,7 @@
  */
 
 #include "casson_io.h"
+#include "ostream.h"
 
 #include "kernel.h"
 
@@ -650,17 +651,15 @@ Boolean	contains_flat_tetrahedra( Triangulation *manifold );
 
 #define NL(f)   (f==0) ? 'u' : ((f==1) ? 'v' : ((f==2) ? 'w' : 'x'))
 
-char *
-write_casson_format_to_string(
+static
+void
+write_casson_format_to_stream(
+    OStream * stream,
     Triangulation * manifold,
     Boolean ae,
     Boolean ex,
     Boolean curves)
 {
-    char * buffer = my_malloc(10000000);
-
-    char * p = buffer;
-
 	int		index;
 	Tetrahedron	*tet;
 	EdgeClass	*edge;
@@ -678,50 +677,50 @@ write_casson_format_to_string(
 		{
 		    if (contains_flat_tetrahedra(manifold)==TRUE)
 		    {
-			p += sprintf(p, "SolutionType partially_flat_solution\n");
+			ostream_printf(stream, "SolutionType partially_flat_solution\n");
 		    }
 		    else
 		    {
-			p += sprintf(p, "SolutionType geometric_solution\n");
+			ostream_printf(stream, "SolutionType geometric_solution\n");
 		    }
 		}
 
 		if (manifold->solution_type[complete] == nongeometric_solution )
 		{
-		    p += sprintf(p, "SolutionType nongeometric_solution\n");
+		    ostream_printf(stream, "SolutionType nongeometric_solution\n");
 		}
 
 		if (manifold->solution_type[complete] == not_attempted )
-		    p += sprintf(p, "SolutionType not_attempted\n");
+		    ostream_printf(stream, "SolutionType not_attempted\n");
 
 		if (manifold->solution_type[complete] == other_solution )
-		    p += sprintf(p, "SolutionType other_solution\n");
+		    ostream_printf(stream, "SolutionType other_solution\n");
 
 		if (manifold->solution_type[complete] == step_failed )
-		    p += sprintf(p, "SolutionType step_failed\n");
+		    ostream_printf(stream, "SolutionType step_failed\n");
 
 		if (manifold->solution_type[complete] == no_solution )
-		    p += sprintf(p, "SolutionType no_solution\n");
+		    ostream_printf(stream, "SolutionType no_solution\n");
 
 		if (manifold->solution_type[complete] == invalid_solution )
-		    p += sprintf(p, "SolutionType invalid_solution\n");
+		    ostream_printf(stream, "SolutionType invalid_solution\n");
 
 		if (manifold->solution_type[complete] == degenerate_solution )
-		    p += sprintf(p, "SolutionType degenerate_solution\n");
+		    ostream_printf(stream, "SolutionType degenerate_solution\n");
 
 		if (manifold->solution_type[complete] == flat_solution )
-		    p += sprintf(p, "SolutionType flat_solution\n");
+		    ostream_printf(stream, "SolutionType flat_solution\n");
 
-		p += sprintf(p, "vertices_known\n\n");
+		ostream_printf(stream, "vertices_known\n\n");
 	}
 
 	for (	edge = manifold->edge_list_begin.next, index = 1;
 		edge!=&manifold->edge_list_end;
 		edge = edge->next, index++)
 	{
-	    p += sprintf(p, "%3d %2d", index, edge->singular_index + 1);
+	    ostream_printf(stream, "%3d %2d", index, edge->singular_index + 1);
 
-	    p += sprintf(p, " %04.3f", edge->singular_order );
+	    ostream_printf(stream, " %04.3f", edge->singular_order );
 
 	    set_left_edge(edge,&ptet0);
 	    ptet = ptet0;
@@ -739,74 +738,74 @@ write_casson_format_to_string(
 				veer_left(&ptet);
 			}while (!same_positioned_tet(&ptet, &ptet0));
 
-			p += sprintf(p, " %21.16f", err );
+			ostream_printf(stream, " %21.16f", err );
 		}
 
 		if (ex)
 		{
 			if (ptet.tet->cusp[remaining_face[ptet.left_face][ptet.near_face]]->index > -1 )
-				p += sprintf(p, " %2d", ptet.tet->cusp[remaining_face[ptet.left_face][ptet.near_face]]->index + 1 );
-			else	p += sprintf(p, " %2d", ptet.tet->cusp[remaining_face[ptet.left_face][ptet.near_face]]->index );
+				ostream_printf(stream, " %2d", ptet.tet->cusp[remaining_face[ptet.left_face][ptet.near_face]]->index + 1 );
+			else	ostream_printf(stream, " %2d", ptet.tet->cusp[remaining_face[ptet.left_face][ptet.near_face]]->index );
 
 			if (ptet.tet->cusp[remaining_face[ptet.near_face][ptet.left_face]]->index > -1 )
-				p += sprintf(p, " %2d", ptet.tet->cusp[remaining_face[ptet.near_face][ptet.left_face]]->index + 1 );
-			else    p += sprintf(p, " %2d", ptet.tet->cusp[remaining_face[ptet.near_face][ptet.left_face]]->index );
+				ostream_printf(stream, " %2d", ptet.tet->cusp[remaining_face[ptet.near_face][ptet.left_face]]->index + 1 );
+			else    ostream_printf(stream, " %2d", ptet.tet->cusp[remaining_face[ptet.near_face][ptet.left_face]]->index );
 		}
 
 		do{
 			char c = NL(ptet.left_face);
 			char d = NL(ptet.near_face);
 
-			p += sprintf(p, " %2d%c%c",ptet.tet->index,c,d);
+			ostream_printf(stream, " %2d%c%c",ptet.tet->index,c,d);
 
 			veer_left(&ptet);
 
 		}while (!same_positioned_tet(&ptet, &ptet0));
 
-		p += sprintf(p, "\n");
+		ostream_printf(stream, "\n");
 	}
 
 	if (ex && manifold->solution_type[complete] != not_attempted )
 	{
-		p += sprintf(p, "\n");
+		ostream_printf(stream, "\n");
 
 		for (   edge = manifold->edge_list_begin.next, index = 1;
 			edge!=&manifold->edge_list_end;
 			edge = edge->next, index++)
 		{
-		    p += sprintf(p, "%3d", index);
+		    ostream_printf(stream, "%3d", index);
 
 			set_left_edge(edge,&ptet0);
 			ptet = ptet0;
 
-			p += sprintf(p, " %21.16f", edge->inner_product[ultimate] );
+			ostream_printf(stream, " %21.16f", edge->inner_product[ultimate] );
 
 			int top = remaining_face[ptet.left_face][ptet.near_face];
-                        p += sprintf(p, " %21.16f", ptet.tet->cusp[top]->inner_product[ultimate] );
+                        ostream_printf(stream, " %21.16f", ptet.tet->cusp[top]->inner_product[ultimate] );
 
                         int bottom = remaining_face[ptet.near_face][ptet.left_face];
-                        p += sprintf(p, " %21.16f", ptet.tet->cusp[bottom]->inner_product[ultimate] );
+                        ostream_printf(stream, " %21.16f", ptet.tet->cusp[bottom]->inner_product[ultimate] );
 
 			do
 			{
-				p += sprintf(p, " %21.16f", ptet.tet->dihedral_angle[ultimate]
+				ostream_printf(stream, " %21.16f", ptet.tet->dihedral_angle[ultimate]
 						[edge_between_faces[ptet.near_face][ptet.left_face]]);
 				veer_left(&ptet);
 			}while (!same_positioned_tet(&ptet, &ptet0));
 
-			p += sprintf(p, "\n");
+			ostream_printf(stream, "\n");
 		}
 	}
 
 	if (ex && curves )
 	{
-                p += sprintf(p, "\n");
+                ostream_printf(stream, "\n");
 
                 for (   edge = manifold->edge_list_begin.next, index = 1;
                         edge!=&manifold->edge_list_end;
                         edge = edge->next, index++)
                 {
-		    p += sprintf(p, "%3d", index);
+		    ostream_printf(stream, "%3d", index);
 
                         set_left_edge(edge,&ptet0);
                         ptet = ptet0;
@@ -816,7 +815,7 @@ write_casson_format_to_string(
 				int top = remaining_face[ptet.left_face][ptet.near_face];
 				int bottom = remaining_face[ptet.near_face][ptet.left_face];
 
-                                p += sprintf(p, "   %2d %2d %2d %2d %2d %2d %2d %2d",
+                                ostream_printf(stream, "   %2d %2d %2d %2d %2d %2d %2d %2d",
 					ptet.tet->curve[0][0][top][bottom],
 					ptet.tet->curve[0][0][bottom][top],
 					ptet.tet->curve[0][1][top][bottom],
@@ -828,9 +827,22 @@ write_casson_format_to_string(
                                 veer_left(&ptet);
                         }while (!same_positioned_tet(&ptet, &ptet0));
 
-                        p += sprintf(p, "\n");
+                        ostream_printf(stream, "\n");
                 }
 	}
+}
 
-	return buffer;
+char *
+write_casson_format_to_string(
+    Triangulation * manifold,
+    Boolean ae,
+    Boolean ex,
+    Boolean curves)
+{
+    OStream stream;
+    string_stream_init(&stream);
+
+    write_casson_format_to_stream(&stream, manifold, ae, ex, curves);
+
+    return stream.buffer;
 }

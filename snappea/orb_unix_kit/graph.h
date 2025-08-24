@@ -1,3 +1,6 @@
+#ifndef _graph_
+#define _graph_
+
 #ifdef __cplusplus
 extern "C" {
 #endif 
@@ -64,3 +67,5 @@ Triangulation    *triangulate_graph_complement( Graph *gamma, Boolean remove_ver
 #ifdef __cplusplus
 }
 #endif 
+
+#endif

@@ -51,34 +51,34 @@ static Boolean fill_diagram(
 	diagram->edges[diagram->num_edges] = e;
 	initialize_diagram_edge(e);
 
-	int index, vertex_id0, vertex_id1, type;
+	int index, vertex_id0, vertex_id1, edge_type;
 	if (sscanf(file_data,
 		   "%d%d%d%d%n",
 		   &index,
 		   &vertex_id0,
 		   &vertex_id1,
-		   &type,
+		   &edge_type,
 		   &chars_consumed) != 4) {
 	    return FALSE;
 	}
 
 	e->vertex[diagramBegin] = diagram->vertices[vertex_id0];
 	e->vertex[diagramEnd]   = diagram->vertices[vertex_id1];
-	e->type = type;
+	e->edge_type = edge_type;
 
 	DiagramEndData * begin_data = NEW_STRUCT(DiagramEndData);
 	begin_data->edge = e;
 	begin_data->type = diagramBegin;
 	begin_data->singular = FALSE;
 	begin_data->angle = 0.0;
-	add_end_data_to_vertex(begin_data, diagram->vertices[vertex_id0]);
+	add_end_data_to_diagram_vertex(begin_data, diagram->vertices[vertex_id0]);
 
 	DiagramEndData * end_data = NEW_STRUCT(DiagramEndData);
 	end_data->edge = e;
 	end_data->type = diagramEnd;
 	end_data->singular = FALSE;
 	end_data->angle = 0.0;
-	add_end_data_to_vertex(end_data, diagram->vertices[vertex_id1]);
+	add_end_data_to_diagram_vertex(end_data, diagram->vertices[vertex_id1]);
 
 	file_data += chars_consumed;
     }
@@ -156,7 +156,7 @@ write_diagram_to_stream(
 	    i,
 	    diagram->edges[i]->vertex[diagramBegin]->vertex_id,
 	    diagram->edges[i]->vertex[diagramEnd]->vertex_id,
-	    (int)diagram->edges[i]->type);
+	    (int)diagram->edges[i]->edge_type);
 	diagram->edges[i]->edge_id = i;
     }
 

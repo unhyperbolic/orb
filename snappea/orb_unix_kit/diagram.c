@@ -96,10 +96,10 @@ void initialize_diagram_edge(DiagramEdge * edge)
     edge->arc_id = -1;
     edge->link_id = -1;
     edge->edge_id = -1;
-    edge->type = diagramSingular;
+    edge->edge_type = diagramSingular;
 }
 
-void add_end_data_to_vertex(DiagramEndData * data, DiagramVertex * vertex)
+void add_end_data_to_diagram_vertex(DiagramEndData * data, DiagramVertex * vertex)
 {
     DiagramEndData ** new_incident_end_data =
 	NEW_ARRAY(vertex->num_incident_end_data + 1, DiagramEndData*);
@@ -112,7 +112,7 @@ void add_end_data_to_vertex(DiagramEndData * data, DiagramVertex * vertex)
     vertex->incident_end_data = new_incident_end_data;
 }
 
-void add_crossing_to_edge(DiagramCrossing * crossing, DiagramEdge * edge)
+void add_crossing_to_diagram_edge(DiagramCrossing * crossing, DiagramEdge * edge)
 {
     DiagramCrossing ** new_crossings =
 	NEW_ARRAY(edge->num_crossings + 1, DiagramCrossing*);
@@ -151,7 +151,7 @@ void assign_diagram_arcs(Diagram * diagram)
 	DiagramEdge * edge = diagram->edges[0];
 	queue[queue_end++] = edge;
 	visited[0] = TRUE;
-	drilled_arc = edge->type == diagramDrilled;
+	drilled_arc = edge->edge_type == diagramDrilled;
 	if (!drilled_arc)
 	{
 	    edge->arc_id = diagram->num_arcs;
@@ -224,7 +224,7 @@ void assign_diagram_arcs(Diagram * diagram)
 	    queue[queue_end++] = edge;
 	    visited[edge->edge_id] = TRUE;
 
-	    drilled_arc = edge->type == diagramDrilled;
+	    drilled_arc = edge->edge_type == diagramDrilled;
 	    if (!drilled_arc)
 	    {
 		edge->arc_id = diagram->num_arcs;
@@ -255,7 +255,7 @@ void assign_diagram_links(Diagram * diagram)
 	DiagramEdge * edge = diagram->edges[i];
 	edge->edge_id = i;
 	edge->link_id = -2;
-	visited[i] = edge->type != diagramDrilled;
+	visited[i] = edge->edge_type != diagramDrilled;
 
 	if (queue_begin == queue_end && !visited[i])
 	{
@@ -307,7 +307,7 @@ void assign_diagram_links(Diagram * diagram)
 	v->link_id = -1;
 	for (int j = 0; j < v->num_incident_end_data; j++)
 	{
-	    if (v->incident_end_data[j]->edge->type == diagramDrilled)
+	    if (v->incident_end_data[j]->edge->edge_type == diagramDrilled)
 	    {
 		v->link_id = v->incident_end_data[j]->edge->link_id;
 		break;
@@ -338,8 +338,8 @@ void assign_diagram_links(Diagram * diagram)
 		    DiagramVertex * v1 = e->vertex[k];
 		    if (v1->num_incident_end_data != 2 ||
 			v1->link_id > -1 ||
-			v1->incident_end_data[0]->edge->type == diagramDrilled ||
-			v1->incident_end_data[1]->edge->type == diagramDrilled)
+			v1->incident_end_data[0]->edge->edge_type == diagramDrilled ||
+			v1->incident_end_data[1]->edge->edge_type == diagramDrilled)
 		    {
 			singular_loop = FALSE;
 			break;
@@ -392,7 +392,7 @@ char * dump_diagram(Diagram * diagram)
 	DiagramEdge * e = diagram->edges[i];
 	p += snprintf(p, end - p, "Edge:\n");
 	p += snprintf(p, end - p, "    %d %d\n", e->vertex[0]->vertex_id, e->vertex[1]->vertex_id);
-	p += snprintf(p, end - p, "    %d %d %d %d\n", e->edge_id, e->arc_id, e->link_id, e->type);
+	p += snprintf(p, end - p, "    %d %d %d %d\n", e->edge_id, e->arc_id, e->link_id, e->edge_type);
 	for (int j = 0; j < e->num_crossings; j++) {
 	    DiagramCrossing * c = e->crossings[j];
 	    p += snprintf(p, end - p, "    Crossing %d\n", c->crossing_id);
@@ -423,7 +423,7 @@ point_position_to_complex(DiagramVertex * v)
 }
 
 void
-diagram_get_crossing_signs(Diagram * diagram)
+assign_diagram_crossing_signs(Diagram * diagram)
 {
     for (int i = 0; i < diagram->num_crossings; i++)
     {
@@ -441,7 +441,7 @@ diagram_get_crossing_signs(Diagram * diagram)
 }
 
 void
-diagram_ed_angles(Diagram * diagram)
+assign_diagram_end_data_angles(Diagram * diagram)
 {
     for (int i = 0; i < diagram->num_vertices; i++)
     {
@@ -463,13 +463,13 @@ diagram_ed_angles(Diagram * diagram)
 }
 
 void
-assign_diagram_crossings_to_edges(Diagram * diagram)
+assign_crossings_to_diagram_edges(Diagram * diagram)
 {
     for (int i = 0; i < diagram->num_crossings; i++)
     {
         DiagramCrossing * c = diagram->crossings[i];
-	add_crossing_to_edge(c, c->over);
-	add_crossing_to_edge(c, c->under);
+	add_crossing_to_diagram_edge(c, c->over);
+	add_crossing_to_diagram_edge(c, c->under);
     }
 }
 
@@ -490,7 +490,7 @@ prepare_diagram_components_for_output(Diagram * diagram)
 		    {
 		        if (e->vertex[k]->link_id != -1 )
 		        {
-			    e->vertex[k]->incident_end_data[diagram_get_strand(e,e->vertex[k])]->singular=(k==1);
+			    e->vertex[k]->incident_end_data[get_diagram_strand(e,e->vertex[k])]->singular=(k==1);
 			    if (k == 0)
 			    {
 			        link_id = e->vertex[k]->link_id;
@@ -517,7 +517,7 @@ prepare_diagram_components_for_output(Diagram * diagram)
 	{
   	    for( int j = 0; j < v->num_incident_end_data; j++)
 	    {
-	        if (v->incident_end_data[j]->edge->type == diagramDrilled)
+	        if (v->incident_end_data[j]->edge->edge_type == diagramDrilled)
 		{
  		    v->link_id = v->incident_end_data[j]->edge->link_id;
 		}
@@ -526,7 +526,7 @@ prepare_diagram_components_for_output(Diagram * diagram)
     }
 }
 
-int diagram_get_strand(DiagramEdge * e, DiagramVertex * v)
+int get_diagram_strand(DiagramEdge * e, DiagramVertex * v)
 {
     for (int i = 0; i < v->num_incident_end_data; i++)
     {
@@ -540,7 +540,7 @@ int diagram_get_strand(DiagramEdge * e, DiagramVertex * v)
     return -1;
 }
 
-DiagramCrossing * get_next_crossing(DiagramEdge *e, DiagramCrossing *c)
+DiagramCrossing * get_next_diagram_crossing(DiagramEdge *e, DiagramCrossing *c)
 {
     int i;
     for (i = 0; i < e->num_crossings; i++)
@@ -558,7 +558,7 @@ DiagramCrossing * get_next_crossing(DiagramEdge *e, DiagramCrossing *c)
     return NULL;
 }
 
-DiagramCrossing * get_prev_crossing(DiagramEdge *e, DiagramCrossing *c)
+DiagramCrossing * get_prev_diagram_crossing(DiagramEdge *e, DiagramCrossing *c)
 {
     int i;
     for (i = 0; i < e->num_crossings; i++)
@@ -667,13 +667,14 @@ void remove_meeting( Graph *graph, int index )
     }
 }
 
+/* Ported from DiagramCanvas::outputTriangulation in interface.cpp */
 Graph * diagram_to_graph(Diagram * diagram)
 {
     int num_meetings = 0;
 
-    diagram_get_crossing_signs(diagram);
-    diagram_ed_angles(diagram);
-    assign_diagram_crossings_to_edges(diagram);
+    assign_diagram_crossing_signs(diagram);
+    assign_diagram_end_data_angles(diagram);
+    assign_crossings_to_diagram_edges(diagram);
     prepare_diagram_components_for_output(diagram);
 
     for(int i = 0; i < diagram->num_vertices; i++)
@@ -729,7 +730,7 @@ Graph * diagram_to_graph(Diagram * diagram)
 	    {
 	        if (e->num_crossings == 0)
 		{
-		    meeting->strand[j] = diagram_get_strand(e, e->vertex[diagramEnd]);
+		    meeting->strand[j] = get_diagram_strand(e, e->vertex[diagramEnd]);
 		    meeting->neighbor[j] = e->vertex[diagramEnd]->vertex_id;
 		}
 		else
@@ -751,7 +752,7 @@ Graph * diagram_to_graph(Diagram * diagram)
 	    {
 	        if (e->num_crossings == 0)
 		{
-		    meeting->strand[j] = diagram_get_strand(e, e->vertex[diagramBegin]);
+		    meeting->strand[j] = get_diagram_strand(e, e->vertex[diagramBegin]);
 		    meeting->neighbor[j] = e->vertex[diagramBegin]->vertex_id;
 		}
 		else
@@ -797,9 +798,9 @@ Graph * diagram_to_graph(Diagram * diagram)
           meeting->component[0] = e->link_id;
           meeting->component[2] = e->link_id;
 
-          if ( (other = get_prev_crossing( e, c)) == NULL)
+          if ( (other = get_prev_diagram_crossing( e, c)) == NULL)
           {
-                meeting->strand[0] = diagram_get_strand( e, e->vertex[diagramBegin] );
+                meeting->strand[0] = get_diagram_strand( e, e->vertex[diagramBegin] );
                 meeting->neighbor[0] = e->vertex[diagramBegin]->vertex_id;
           }
           else
@@ -808,9 +809,9 @@ Graph * diagram_to_graph(Diagram * diagram)
                 meeting->strand[0] = (other->over==e) ? 2 : 3;
           }
 
-          if ( (other = get_next_crossing( e, c)) == NULL)
+          if ( (other = get_next_diagram_crossing( e, c)) == NULL)
           {
-                meeting->strand[2] = diagram_get_strand( e, e->vertex[diagramEnd] );
+                meeting->strand[2] = get_diagram_strand( e, e->vertex[diagramEnd] );
                 meeting->neighbor[2] = e->vertex[diagramEnd]->vertex_id;
           }
           else
@@ -824,9 +825,9 @@ Graph * diagram_to_graph(Diagram * diagram)
           meeting->component[1] = e->link_id;
           meeting->component[3] = e->link_id;
 
-          if ( (other = get_prev_crossing( e, c)) == NULL)
+          if ( (other = get_prev_diagram_crossing( e, c)) == NULL)
           {
-                meeting->strand[1] = diagram_get_strand( e, e->vertex[diagramBegin] );
+                meeting->strand[1] = get_diagram_strand( e, e->vertex[diagramBegin] );
                 meeting->neighbor[1] = e->vertex[diagramBegin]->vertex_id;
           }
           else
@@ -835,9 +836,9 @@ Graph * diagram_to_graph(Diagram * diagram)
                 meeting->strand[1] = (other->over==e) ? 2 : 3;
           }
 
-          if ( (other = get_next_crossing( e, c)) == NULL)
+          if ( (other = get_next_diagram_crossing( e, c)) == NULL)
           {
-                meeting->strand[3] = diagram_get_strand( e, e->vertex[diagramEnd] );
+                meeting->strand[3] = get_diagram_strand( e, e->vertex[diagramEnd] );
                 meeting->neighbor[3] = e->vertex[diagramEnd]->vertex_id;
           }
           else
@@ -946,6 +947,7 @@ Graph * diagram_to_graph(Diagram * diagram)
     return graph;
 }
 
+/* Ported from DiagramCanvas::outputTriangulation in interface.cpp */
 Triangulation *
 triangulate_diagram_complement(Diagram *diagram, Boolean remove_vertices)
 {

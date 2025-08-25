@@ -13,38 +13,42 @@ typedef enum DiagramEndType DiagramEndType;
 
 typedef struct Graph Graph;
 
+/* Corresponds to DiagramCanvas::DiagramCanvas in gui/diagram_canvas.cpp */
 void initialize_diagram(Diagram *);
+/* Corresponds to DiagramCanvas::clearDiagram in gui/diagram_canvas.cpp */
 void free_diagram(Diagram *);
+
 void initialize_diagram_vertex(DiagramVertex *vertex);
-void add_end_data_to_vertex(DiagramEndData * data, DiagramVertex * vertex);
-void add_crossing_to_edge(DiagramCrossing * crossing, DiagramEdge * edge);
+void add_end_data_to_diagram_vertex(DiagramEndData * data, DiagramVertex * vertex);
+
 void initialize_diagram_edge(DiagramEdge * edge);
+void add_crossing_to_diagram_edge(DiagramCrossing * crossing, DiagramEdge * edge);
 
 char * dump_diagram(Diagram * diagram);
 
-// Corresponds to DiagramCanvas::assign_arcs.
+/* Corresponds to DiagramCanvas::assign_arcs in gui/interface.cpp */
 void assign_diagram_arcs(Diagram *);
-// Corresponds to DiagramCanvas::assign_links.
+/* Corresponds to DiagramCanvas::assign_links in gui/interface.cpp */
 void assign_diagram_links(Diagram *);
+/* Corresponds to DiagramCanvas::getCrossingSigns in gui/interface.cpp */
+void assign_diagram_crossing_signs(Diagram * diagram);
+/* Corresponds to DiagramCanvas::ed_angles in gui/interface.cpp */
+void assign_diagram_end_data_angles(Diagram * diagram);
+/* Corresponds to DiagramCanvas::assign_crossings_to_edges in gui/interface.cpp */
+void assign_crossings_to_diagram_edges(Diagram * diagram);
+/* Corresponds to DiagramCanvas::prepare_components_for_output in gui/interface.cpp */
+void prepare_diagram_components_for_output(Diagram * diagram);
 
-void
-diagram_get_crossing_signs(Diagram * diagram);
+/* Corresponds to get_strand in gui/misc_functions.cpp */
+int get_diagram_strand(DiagramEdge * e, DiagramVertex * v);
 
-void
-diagram_ed_angles(Diagram * diagram);
-
-void
-assign_diagram_crossings_to_edges(Diagram * diagram);
-
-void
-prepare_diagram_components_for_output(Diagram * diagram);
-
-int diagram_get_strand(DiagramEdge * e, DiagramVertex * v);
-
-DiagramCrossing * get_next_crossing(DiagramEdge *e, DiagramCrossing *c);
-DiagramCrossing * get_prev_crossing(DiagramEdge *e, DiagramCrossing *c);
+/* Corresponds to get_next_crossing in gui/misc_functions.cpp */
+DiagramCrossing * get_next_diagram_crossing(DiagramEdge *e, DiagramCrossing *c);
+/* Corresponds to get_prev_crossing in gui/misc_functions.cpp */
+DiagramCrossing * get_prev_diagram_crossing(DiagramEdge *e, DiagramCrossing *c);
 
 Graph * diagram_to_graph(Diagram *);
+/* Corresponds to DiagramCanvas::outputTriangulation in interface.cpp */
 Triangulation * triangulate_diagram_complement(Diagram *, Boolean remove_vertices);
 
 enum DiagramEndType
@@ -93,13 +97,8 @@ struct DiagramEdge
     DiagramCrossing **crossings;
     int arc_id;
     int link_id;
-//    int cuff_id;
-//    int arc;
     int edge_id;
-//    int thickness; /* ?? */
-//    bool selected; /* ?? */
-//    int a, b, c;
-    DiagramEdgeType type;
+    DiagramEdgeType edge_type;
 };
 
 struct Diagram

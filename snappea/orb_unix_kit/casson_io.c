@@ -12,6 +12,9 @@
 #include <stdio.h>
 #include <string.h>
 
+/* This should be in a header from kernel.h */
+Boolean	contains_flat_tetrahedra( Triangulation *manifold );
+
 typedef struct CassonFormat CassonFormat;
 typedef struct EdgeInfo EdgeInfo;
 typedef struct TetEdgeInfo TetEdgeInfo;
@@ -19,7 +22,10 @@ typedef struct TetEdgeInfo TetEdgeInfo;
 static SolutionType string_to_solution_type(char *str);
 static Boolean skip_blanks(char **str);
 static Boolean fill_casson_struct(CassonFormat *cf, char **str);
-static void free_casson(CassonFormat *cf);
+static CassonFormat *read_casson_struct(char **str);
+static Boolean verify_casson(CassonFormat *cf);
+static void free_casson_format(CassonFormat *cf);
+static Triangulation *casson_to_triangulation(CassonFormat *cf);
 
 static const int vertex_at_faces[4][4] = {
     {9,2,3,1},
@@ -59,6 +65,7 @@ struct TetEdgeInfo
 			*next;
 };
 
+/* Ported from readCassonFormat in gui/organizer.cpp */
 static SolutionType string_to_solution_type(
     char *str)
 {
@@ -78,6 +85,8 @@ static SolutionType string_to_solution_type(
     _SOL_TYPE(step_failed);
     _SOL_TYPE(invalid_solution);
 
+    #undef _SOL_TYPE
+ 
     if (strcmp(str, "partially_flat_solution") == 0) {
         return geometric_solution;
     }
@@ -104,6 +113,7 @@ static Boolean skip_blanks(
     return FALSE;
 }
 
+/* Ported from readCassonFormat in gui/organizer.cpp */
 static Boolean fill_casson_struct(
     CassonFormat *cf,
     char **str)
@@ -120,8 +130,8 @@ static Boolean fill_casson_struct(
 	if (sscanf(
 		*str, " SolutionType %127s%n", solution_type, &consumed) == 1)
 	{
-	    // Set cf->type based on section
-	    // see branches at 712
+	    /* Set cf->type based on section */
+	    /* see branches at 712 */
 	    cf->type = string_to_solution_type(solution_type);
 	    *str += consumed;
 	}
@@ -275,7 +285,7 @@ static Boolean fill_casson_struct(
 
 	}
 
-        // Line 873 in organizer.cpp
+        /* Line 873 in organizer.cpp */
     }
 
     if (cf->vertices_known)
@@ -306,27 +316,24 @@ static Boolean fill_casson_struct(
     return TRUE;
 }
 
-CassonFormat *read_casson_struct(
+/* Ported from readCassonFormat in gui/organizer.cpp */
+static CassonFormat *read_casson_struct(
     char **str)
 {
-    // readCassonFormat( QTextStream &ts)
     CassonFormat * cf = NEW_STRUCT(CassonFormat);
     if (fill_casson_struct(cf, str))
     {
         return cf;
     }
 
-    free_casson(cf);
+    free_casson_format(cf);
     return NULL;
 }
 
-Boolean verify_casson(
-        CassonFormat *cf)
+/* corresponds verify_casson_format in gui/organizer.cpp */
+static Boolean verify_casson(
+    CassonFormat *cf)
 {
-    // From gui/organizer.cpp
-    // bool verifyCassonFormat( CassonFormat *cf )
-
-
 	int		i,j,k;
 	Boolean         check[4][4];
 	EdgeInfo	*ei;
@@ -378,11 +385,9 @@ Boolean verify_casson(
 	return TRUE;
 }
 
-void free_casson(CassonFormat *cf)
+/* Ported from freeCassonFormat in gui/organizer.cpp. */
+void free_casson_format(CassonFormat *cf)
 {
-    // From organizer.cpp
-    // void freeCassonFormat( CassonFormat *cf );
-
     EdgeInfo *e1, *e2;
     TetEdgeInfo *t1, *t2;
 
@@ -410,13 +415,9 @@ void free_casson(CassonFormat *cf)
     my_free(cf);
 }
 
-Triangulation *casson_to_triangulation( CassonFormat *cf )
+/* Ported from cassonToTriangulation in gui/organizer.cpp */
+static Triangulation *casson_to_triangulation( CassonFormat *cf )
 {
-
-    // from gui/organizer.cpp
-    // Triangulation *cassonToTriangulation( CassonFormat *cf )
-
-
 	Triangulation	*manifold;
 	Tetrahedron	*tet, **tet_array;
 	int		i,j,
@@ -630,6 +631,7 @@ Triangulation *casson_to_triangulation( CassonFormat *cf )
 	return manifold;
 }
 
+/* Ported from Organizer::readTriangulation in gui/organizer.cpp. */
 Triangulation * read_casson_format(
     char ** str)
 {
@@ -643,11 +645,9 @@ Triangulation * read_casson_format(
     {
 	t = casson_to_triangulation(cf);
     }
-    free_casson(cf);
+    free_casson_format(cf);
     return t;
 }
-
-Boolean	contains_flat_tetrahedra( Triangulation *manifold );
 
 #define NL(f)   (f==0) ? 'u' : ((f==1) ? 'v' : ((f==2) ? 'w' : 'x'))
 

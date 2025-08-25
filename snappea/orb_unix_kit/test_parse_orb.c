@@ -2,6 +2,7 @@
 
 #include "orb_io.h"
 #include "casson_io.h"
+#include "diagram_io.h"
 
 #include "diagram.h"
 
@@ -31,6 +32,8 @@ int main(int argc, char **argv)
 	if (tri) {
 	    printf("Triangulation\n%s\n", write_casson_format_to_string(tri, TRUE, TRUE, TRUE));
 	}
+
+	printf("Diagram\n%s\n", write_diagram_to_string(diagram));
     }
 
     printf("Status: got trig\n");

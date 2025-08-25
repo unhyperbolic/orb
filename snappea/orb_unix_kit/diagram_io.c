@@ -1,6 +1,7 @@
 #include "diagram_io.h"
 
 #include "diagram.h"
+#include "ostream.h"
 #include "kernel.h"
 
 #include <stdio.h>
@@ -129,4 +130,61 @@ Diagram *read_diagram_from_string(
 
     free_diagram(diagram);
     return NULL;
+}
+
+static
+void
+write_diagram_to_stream(
+    OStream * stream,
+    Diagram * diagram)
+{
+    ostream_printf(stream, "%d\n", diagram->num_vertices);
+    for (int i = 0; i < diagram->num_vertices; i++)
+    {
+	ostream_printf(
+	    stream,
+	    "%d\t%d\t%d\n",
+	    i, diagram->vertices[i]->x, diagram->vertices[i]->y);
+	diagram->vertices[i]->vertex_id = i;
+    }
+
+    ostream_printf(stream, "\n%d\n", diagram->num_edges);
+    for (int i = 0; i < diagram->num_edges; i++)
+    {
+	ostream_printf(
+	    stream,
+	    "%d\t%d\t%d\t%d\n",
+	    i,
+	    diagram->edges[i]->vertex[diagramBegin]->vertex_id,
+	    diagram->edges[i]->vertex[diagramEnd]->vertex_id,
+	    (int)diagram->edges[i]->type);
+	diagram->edges[i]->edge_id = i;
+    }
+
+    ostream_printf(stream, "\n%d\n", diagram->num_crossings);
+    for (int i = 0; i < diagram->num_crossings; i++)
+    {
+	ostream_printf(
+	    stream,
+	    "%d\t%d\t%d,\t%d\t%d\t%lf\t%lf\n",
+	    i,
+	    diagram->crossings[i]->x,
+	    diagram->crossings[i]->y,
+	    diagram->crossings[i]->over->edge_id,
+	    diagram->crossings[i]->under->edge_id,
+	    diagram->crossings[i]->position_on_overstrand,
+	    diagram->crossings[i]->position_on_understrand);
+    }
+}
+
+char *
+write_diagram_to_string(
+    Diagram * diagram)
+{
+    OStream stream;
+    string_stream_init(&stream);
+
+    write_diagram_to_stream(&stream, diagram);
+
+    return stream.buffer;
 }

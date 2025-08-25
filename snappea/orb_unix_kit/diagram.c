@@ -96,7 +96,7 @@ void initialize_diagram_edge(DiagramEdge * edge)
     edge->arc_id = -1;
     edge->link_id = -1;
     edge->edge_id = -1;
-    edge->type = diagramBegin;
+    edge->type = diagramSingular;
 }
 
 void add_end_data_to_vertex(DiagramEndData * data, DiagramVertex * vertex)

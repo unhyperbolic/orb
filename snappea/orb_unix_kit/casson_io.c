@@ -99,15 +99,12 @@ static SolutionType string_to_solution_type(
 static Boolean skip_blanks(
     char **str)
 {
-    while (isspace(**str))
-    {
-        if (**str == '\n')
-        {
+    while (isspace(**str)) {
+        if (**str == '\n') {
             (*str)++;
             return TRUE;
         }
-        if (**str == '\0')
-        {
+        if (**str == '\0') {
             return TRUE;
         }
         (*str)++;
@@ -139,8 +136,7 @@ static Boolean fill_casson_struct(
         }
     }
 
-    if (sscanf(*str, " vertices_known%n", &consumed) == 0)
-    {
+    if (sscanf(*str, " vertices_known%n", &consumed) == 0) {
         cf->vertices_known = TRUE;
         *str += consumed;
     }
@@ -149,12 +145,9 @@ static Boolean fill_casson_struct(
 
     while (1)
     {
-        if (e)
-        {
+        if (e) {
             e = e->next = NEW_STRUCT(EdgeInfo);
-        }
-        else
-        {
+        } else {
             e = cf->head = NEW_STRUCT(EdgeInfo);
         }
         e->next = NULL;
@@ -185,12 +178,10 @@ static Boolean fill_casson_struct(
 
             *str += consumed;
 
-            if (e->one_vertex > 0)
-            {
+            if (e->one_vertex > 0) {
                 e->one_vertex--;
             }
-            if (e->other_vertex > 0)
-            {
+            if (e->other_vertex > 0) {
                 e->other_vertex--;
             }
         }
@@ -199,12 +190,9 @@ static Boolean fill_casson_struct(
 
         while (1)
         {
-            if (t)
-            {
+            if (t) {
                 t = t->next = NEW_STRUCT(TetEdgeInfo);
-            }
-            else
-            {
+            } else {
                 t = e->head = NEW_STRUCT(TetEdgeInfo);
             }
 
@@ -221,8 +209,7 @@ static Boolean fill_casson_struct(
 
             *str += consumed;
 
-            if (t->tet_index > cf->num_tet)
-            {
+            if (t->tet_index > cf->num_tet) {
                 cf->num_tet = t->tet_index;
             }
 
@@ -240,19 +227,18 @@ static Boolean fill_casson_struct(
                 return FALSE;
             }
 
-            if (skip_blanks(str))
-            {
+            if (skip_blanks(str)) {
                 break;
             }
         }
 
-        if (skip_blanks(str))
-        {
+        if (skip_blanks(str)) {
             break;
         }
     }
 
-    if (cf->type != not_attempted) {
+    if (cf->type != not_attempted)
+    {
         /* Note that organizer.cpp returns early if the solution
          * type is not attempted.
          * This is not correct since we still need to parse the
@@ -296,18 +282,14 @@ static Boolean fill_casson_struct(
         for (EdgeInfo * e = cf->head; e != NULL; e = e->next)
         {
             int index;
-            if (sscanf(*str, " %d%n", &index, &consumed) != 1)
-            {
+            if (sscanf(*str, " %d%n", &index, &consumed) != 1) {
                 return FALSE;
             }
             *str += consumed;
 
-            for (TetEdgeInfo * t = e->head; t != NULL; t = t->next)
-            {
-                for (int i = 0; i < 8; i++)
-                {
-                    if (sscanf(*str, " %d%n", &t->curves[i], &consumed) != 1)
-                    {
+            for (TetEdgeInfo * t = e->head; t != NULL; t = t->next) {
+                for (int i = 0; i < 8; i++) {
+                    if (sscanf(*str, " %d%n", &t->curves[i], &consumed) != 1) {
                         return FALSE;
                     }
                     *str += consumed;
@@ -324,8 +306,7 @@ static CassonFormat *read_casson_struct(
     char **str)
 {
     CassonFormat * cf = NEW_STRUCT(CassonFormat);
-    if (fill_casson_struct(cf, str))
-    {
+    if (fill_casson_struct(cf, str)) {
         return cf;
     }
 
@@ -337,10 +318,10 @@ static CassonFormat *read_casson_struct(
 static Boolean verify_casson(
     CassonFormat *cf)
 {
-    if (cf==NULL)
-    {
+    if (cf == NULL) {
 	return FALSE;
     }
+
     Boolean         check[4][4];
     EdgeInfo        *ei;
     TetEdgeInfo     *tei;

@@ -655,9 +655,9 @@ void
 write_casson_format_to_stream(
     OStream * stream,
     Triangulation * manifold,
-    Boolean ae,
-    Boolean ex,
-    Boolean curves)
+    Boolean include_angular_error,
+    Boolean include_geometric_structure_and_cusp_indices,
+    Boolean include_peripheral_curves)
 {
 	int		index;
 	Tetrahedron	*tet;
@@ -670,7 +670,7 @@ write_casson_format_to_stream(
 		tet = tet->next, index++ )
 		tet->index = index;
 
-	if (ex)
+	if (include_geometric_structure_and_cusp_indices)
 	{
 		if (manifold->solution_type[complete] == geometric_solution )
 		{
@@ -724,7 +724,7 @@ write_casson_format_to_stream(
 	    set_left_edge(edge,&ptet0);
 	    ptet = ptet0;
 
-	    if (ae)
+	    if (include_angular_error)
 	    {
 			double err =  (edge->singular_order==0)
 				? 0
@@ -740,7 +740,7 @@ write_casson_format_to_stream(
 			ostream_printf(stream, " %21.16f", err );
 		}
 
-		if (ex)
+	    if (include_geometric_structure_and_cusp_indices)
 		{
 			if (ptet.tet->cusp[remaining_face[ptet.left_face][ptet.near_face]]->index > -1 )
 				ostream_printf(stream, " %2d", ptet.tet->cusp[remaining_face[ptet.left_face][ptet.near_face]]->index + 1 );
@@ -764,7 +764,7 @@ write_casson_format_to_stream(
 		ostream_printf(stream, "\n");
 	}
 
-	if (ex && manifold->solution_type[complete] != not_attempted )
+	if (include_geometric_structure_and_cusp_indices && manifold->solution_type[complete] != not_attempted )
 	{
 		ostream_printf(stream, "\n");
 
@@ -796,7 +796,7 @@ write_casson_format_to_stream(
 		}
 	}
 
-	if (ex && curves )
+        if (include_geometric_structure_and_cusp_indices && include_peripheral_curves )
 	{
                 ostream_printf(stream, "\n");
 
@@ -834,14 +834,19 @@ write_casson_format_to_stream(
 char *
 write_casson_format_to_string(
     Triangulation * manifold,
-    Boolean ae,
-    Boolean ex,
-    Boolean curves)
+    Boolean include_angular_error,
+    Boolean include_geometric_structure_and_cusp_indices,
+    Boolean include_peripheral_curves)
 {
     OStream stream;
     string_stream_init(&stream);
 
-    write_casson_format_to_stream(&stream, manifold, ae, ex, curves);
+    write_casson_format_to_stream(
+	&stream,
+	manifold,
+	include_angular_error,
+	include_geometric_structure_and_cusp_indices,
+	include_peripheral_curves);
 
     return stream.buffer;
 }

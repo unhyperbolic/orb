@@ -386,219 +386,207 @@ void free_casson_format(CassonFormat *cf)
 }
 
 /* Ported from cassonToTriangulation in gui/organizer.cpp */
-static Triangulation *casson_to_triangulation( CassonFormat *cf )
-{
-        Triangulation   *manifold;
-        Tetrahedron     *tet, **tet_array;
-        int             i,j,
-                        a1, a2, a3, a4,
-                        b1, b2, b3, b4,
-                        t1,t2;
-        EdgeInfo        *ei;
-        TetEdgeInfo     *tei1,
-                        *tei2;
+static Triangulation *casson_to_triangulation(CassonFormat *cf) {
+    // int a1, a2, a3, a4, b1, b2, b3, b4, t1, t2;
 
-        manifold = NEW_STRUCT(Triangulation);
-        initialize_triangulation(manifold);
+    Triangulation * manifold = NEW_STRUCT(Triangulation);
+    initialize_triangulation(manifold);
 
-        manifold->num_tetrahedra                        = cf->num_tet;
-        manifold->solution_type[complete]       = not_attempted;
-        manifold->solution_type[ filled ]       = not_attempted;
-        manifold->num_singular_arcs = 0;
-        manifold->num_or_cusps = 0;
-        manifold->num_nonor_cusps = 0;
-        manifold->num_cusps = 0;
+    manifold->num_tetrahedra = cf->num_tet;
+    manifold->solution_type[complete] = not_attempted;
+    manifold->solution_type[filled] = not_attempted;
+    manifold->num_singular_arcs = 0;
+    manifold->num_or_cusps = 0;
+    manifold->num_nonor_cusps = 0;
+    manifold->num_cusps = 0;
 
-        tet_array = NEW_ARRAY(manifold->num_tetrahedra, Tetrahedron *);
-        for (i = 0; i < manifold->num_tetrahedra; i++)
-        {
-                tet_array[i] = NEW_STRUCT(Tetrahedron);
-                initialize_tetrahedron(tet_array[i]);
-                INSERT_BEFORE(tet_array[i], &manifold->tet_list_end);
+    Tetrahedron ** tet_array = NEW_ARRAY(manifold->num_tetrahedra, Tetrahedron *);
+    for (int i = 0; i < manifold->num_tetrahedra; i++) {
+        tet_array[i] = NEW_STRUCT(Tetrahedron);
+        initialize_tetrahedron(tet_array[i]);
+        INSERT_BEFORE(tet_array[i], &manifold->tet_list_end);
+    }
+
+    EdgeInfo * ei = cf->head;
+    while (ei != NULL) {
+        TetEdgeInfo * tei1 = ei->head;
+        while (tei1 != NULL) {
+	    TetEdgeInfo * tei2;
+            if (tei1->next == NULL)
+                tei2 = ei->head;
+            else
+                tei2 = tei1->next;
+
+            int t1 = tei1->tet_index;
+            int a1 = tei1->f1;
+            int a2 = tei1->f2;
+            int a3 = vertex_at_faces[a1][a2];
+            int a4 = vertex_at_faces[a2][a1];
+
+            int t2 = tei2->tet_index;
+            int b1 = tei2->f1;
+            int b2 = tei2->f2;
+            int b3 = vertex_at_faces[b1][b2];
+            int b4 = vertex_at_faces[b2][b1];
+
+            tet_array[t1]
+                ->dihedral_angle[ultimate][edge_between_faces[a1][a2]] =
+                tei1->dihedral_angle;
+
+            tet_array[t1]->neighbor[a1] = tet_array[t2];
+            tet_array[t2]->neighbor[b2] = tet_array[t1];
+
+            tet_array[t1]->gluing[a1] =
+                CREATE_PERMUTATION(a1, b2, a2, b1, a3, b3, a4, b4);
+
+            tet_array[t2]->gluing[b2] =
+                CREATE_PERMUTATION(b1, a2, b2, a1, b3, a3, b4, a4);
+
+            tei1 = tei1->next;
+        }
+        ei = ei->next;
+    }
+
+    create_edge_classes(manifold);
+    orient_edge_classes(manifold);
+
+    create_cusps(manifold);
+    count_cusps(manifold);
+
+    ei = cf->head;
+
+    while (ei != NULL) {
+        TetEdgeInfo * tei1 = ei->head;
+        int t1 = tei1->tet_index;
+        int a1 = tei1->f1;
+        int a2 = tei1->f2;
+
+        int index = edge_between_faces[a1][a2];
+        EdgeClass *edge = tet_array[t1]->edge_class[index];
+
+        edge->inner_product[ultimate] = ei->e_inner_product;
+        edge->inner_product[penultimate] = ei->e_inner_product;
+
+        tet_array[t1]->cusp[remaining_face[a1][a2]]->inner_product[ultimate] =
+            ei->v_inner_product1;
+        tet_array[t1]
+            ->cusp[remaining_face[a1][a2]]
+            ->inner_product[penultimate] = ei->v_inner_product1;
+
+        tet_array[t1]->cusp[remaining_face[a2][a1]]->inner_product[ultimate] =
+            ei->v_inner_product2;
+        tet_array[t1]
+            ->cusp[remaining_face[a2][a1]]
+            ->inner_product[penultimate] = ei->v_inner_product2;
+
+        if (ei->singular_index < 0) {
+            edge->is_singular = FALSE;
+            edge->singular_order = 1;
+            edge->old_singular_order = 1;
+            edge->singular_index = -1;
+        } else {
+            edge->is_singular = TRUE;
+            manifold->num_singular_arcs++;
+            edge->singular_order = ei->singular_order;
+            edge->old_singular_order = ei->singular_order;
+            edge->singular_index = ei->singular_index;
         }
 
-        ei = cf->head;
-        while (ei!=NULL)
-        {
-                tei1 = ei->head;
-                while (tei1!=NULL)
-                {
-                        if (tei1->next==NULL)
-                                tei2 = ei->head;
-                        else    tei2 = tei1->next;
+        ei = ei->next;
+    }
 
-                        t1 = tei1->tet_index;
-                        a1 = tei1->f1;
-                        a2 = tei1->f2;
-                        a3 = vertex_at_faces[a1][a2];
-                        a4 = vertex_at_faces[a2][a1];
+    if (cf->type != not_attempted)
+        for (Tetrahedron * tet = manifold->tet_list_begin.next;
+             tet != &manifold->tet_list_end; tet = tet->next) {
+            Boolean neg = FALSE;
 
-
-                        t2 = tei2->tet_index;
-                        b1 = tei2->f1;
-                        b2 = tei2->f2;
-                        b3 = vertex_at_faces[b1][b2];
-                        b4 = vertex_at_faces[b2][b1];
-
-                        tet_array[t1]->dihedral_angle[ultimate][edge_between_faces[a1][a2]]
-                                = tei1->dihedral_angle;
-
-                        tet_array[t1]->neighbor[a1] = tet_array[t2];
-                        tet_array[t2]->neighbor[b2] = tet_array[t1];
-
-                        tet_array[t1]->gluing[a1] = CREATE_PERMUTATION(
-                                a1, b2, a2, b1, a3, b3, a4, b4 );
-
-                        tet_array[t2]->gluing[b2] = CREATE_PERMUTATION(
-                                b1, a2, b2, a1, b3, a3, b4, a4 );
-
-                        tei1 = tei1->next;
-                }
-                ei = ei->next;
-        }
-
-
-        create_edge_classes(manifold);
-        orient_edge_classes(manifold);
-
-        create_cusps( manifold );
-        count_cusps( manifold );
-
-
-        ei = cf->head;
-
-        while (ei!=NULL)
-        {
-                tei1 = ei->head;
-                t1 = tei1->tet_index;
-                a1 = tei1->f1;
-                a2 = tei1->f2;
-
-                int index = edge_between_faces[a1][a2];
-                EdgeClass *edge = tet_array[t1]->edge_class[index];
-
-                edge->inner_product[ultimate]   = ei->e_inner_product;
-                edge->inner_product[penultimate]= ei->e_inner_product;
-
-                tet_array[t1]->cusp[remaining_face[a1][a2]]->inner_product[ultimate]
-                                                = ei->v_inner_product1;
-                tet_array[t1]->cusp[remaining_face[a1][a2]]->inner_product[penultimate]
-                                                = ei->v_inner_product1;
-
-                tet_array[t1]->cusp[remaining_face[a2][a1]]->inner_product[ultimate]
-                                                = ei->v_inner_product2;
-                tet_array[t1]->cusp[remaining_face[a2][a1]]->inner_product[penultimate]
-                                                = ei->v_inner_product2;
-
-                if (ei->singular_index  < 0 )
-                {
-                        edge->is_singular = FALSE;
-                        edge->singular_order = 1;
-                        edge->old_singular_order = 1;
-                        edge->singular_index = -1;
-                }
-                else
-                {
-                        edge->is_singular               = TRUE;
-                        manifold->num_singular_arcs++;
-                        edge->singular_order            = ei->singular_order;
-                        edge->old_singular_order        = ei->singular_order;
-                        edge->singular_index            = ei->singular_index;
-                }
-
-                ei = ei->next;
-        }
-
-        if (cf->type != not_attempted )
-            for( tet = manifold->tet_list_begin.next;
-                 tet != &manifold->tet_list_end;
-                 tet = tet->next )
-        {
-                Boolean neg = FALSE;
-
-                for(i=0;i<4;i++)
-                for(j=0;j<4;j++)
-                if (i!=j)
-                {
-                        EdgeClass *edge = tet->edge_class[edge_between_vertices[i][j]];
+            for (int i = 0; i < 4; i++)
+                for (int j = 0; j < 4; j++)
+                    if (i != j) {
+                        EdgeClass *edge =
+                            tet->edge_class[edge_between_vertices[i][j]];
                         tet->Gram_matrix[i][j] = edge->inner_product[ultimate];
 
-                        if ( tet->dihedral_angle[ultimate][edge_between_vertices[i][j]] < -0.0001 ||
-                                tet->dihedral_angle[ultimate][edge_between_vertices[i][j]] > PI + 0.0001 )
-                                neg = TRUE;
-                }
-                else
-                {
+                        if (tet->dihedral_angle[ultimate]
+                                               [edge_between_vertices[i][j]] <
+                                -0.0001 ||
+                            tet->dihedral_angle[ultimate]
+                                               [edge_between_vertices[i][j]] >
+                                PI + 0.0001)
+                            neg = TRUE;
+                    } else {
                         Cusp *cusp = tet->cusp[i];
                         tet->Gram_matrix[i][i] = cusp->inner_product[ultimate];
-                }
+                    }
 
-                for(i=0;i<4;i++)
-                        for(j=0;j<4;j++)
-                                tet->inverse_Gram_matrix[i][j] = minor1( tet->Gram_matrix, i, j );
+            for (int i = 0; i < 4; i++)
+                for (int j = 0; j < 4; j++)
+                    tet->inverse_Gram_matrix[i][j] =
+                        minor1(tet->Gram_matrix, i, j);
 
-                tet->orientation_parameter[ultimate] = safe_sqrt( -gl4R_determinant( tet->Gram_matrix ) );
-                if (neg) tet->orientation_parameter[ultimate] *= -1;
+            tet->orientation_parameter[ultimate] =
+                safe_sqrt(-gl4R_determinant(tet->Gram_matrix));
+            if (neg) tet->orientation_parameter[ultimate] *= -1;
 
-                for( i = 0; i<6;i++)
-                if ( cos( tet->dihedral_angle[ultimate][i] ) * cos( tet->dihedral_angle[ultimate][i] ) < 1 / 2 )
-                        for(j=0;j<2;j++)
-                                tet->use_orientation_parameter[j][i] = FALSE;
+            for (int i = 0; i < 6; i++)
+                if (cos(tet->dihedral_angle[ultimate][i]) *
+                        cos(tet->dihedral_angle[ultimate][i]) <
+                    1 / 2)
+                    for (int j = 0; j < 2; j++)
+                        tet->use_orientation_parameter[j][i] = FALSE;
                 else
-                        for(j=0;j<2;j++)
-                                tet->use_orientation_parameter[j][i] = TRUE;
+                    for (int j = 0; j < 2; j++)
+                        tet->use_orientation_parameter[j][i] = TRUE;
         }
 
-        identify_cusps( manifold );
+    identify_cusps(manifold);
 
-        ei = cf->head;
+    ei = cf->head;
 
-        if (cf->vertices_known)
-        while (ei!=NULL)
-        {
-                tei1 = ei->head;
+    if (cf->vertices_known)
+        while (ei != NULL) {
+            TetEdgeInfo * tei1 = ei->head;
+            int t1 = tei1->tet_index;
+            int a1 = tei1->f1;
+            int a2 = tei1->f2;
+
+            tet_array[t1]->cusp[remaining_face[a1][a2]]->index = ei->one_vertex;
+            tet_array[t1]->cusp[remaining_face[a2][a1]]->index =
+                ei->other_vertex;
+
+            while (tei1 != NULL) {
                 t1 = tei1->tet_index;
                 a1 = tei1->f1;
                 a2 = tei1->f2;
+                int top = remaining_face[a1][a2];
+                int bottom = remaining_face[a2][a1];
 
-                tet_array[t1]->cusp[remaining_face[a1][a2]]->index = ei->one_vertex;
-                tet_array[t1]->cusp[remaining_face[a2][a1]]->index = ei->other_vertex;
+                tet_array[t1]->curve[0][0][top][bottom] = tei1->curves[0];
+                tet_array[t1]->curve[0][0][bottom][top] = tei1->curves[1];
+                tet_array[t1]->curve[0][1][top][bottom] = tei1->curves[2];
+                tet_array[t1]->curve[0][1][bottom][top] = tei1->curves[3];
+                tet_array[t1]->curve[1][0][top][bottom] = tei1->curves[4];
+                tet_array[t1]->curve[1][0][bottom][top] = tei1->curves[5];
+                tet_array[t1]->curve[1][1][top][bottom] = tei1->curves[6];
+                tet_array[t1]->curve[1][1][bottom][top] = tei1->curves[7];
 
-                while (tei1!=NULL)
-                {
-                        t1 = tei1->tet_index;
-                        a1 = tei1->f1;
-                        a2 = tei1->f2;
-                        int top         = remaining_face[a1][a2];
-                        int bottom      = remaining_face[a2][a1];
+                tei1 = tei1->next;
+            }
 
-                        tet_array[t1]->curve[0][0][top][bottom] = tei1->curves[0];
-                        tet_array[t1]->curve[0][0][bottom][top] = tei1->curves[1];
-                        tet_array[t1]->curve[0][1][top][bottom] = tei1->curves[2];
-                        tet_array[t1]->curve[0][1][bottom][top] = tei1->curves[3];
-                        tet_array[t1]->curve[1][0][top][bottom] = tei1->curves[4];
-                        tet_array[t1]->curve[1][0][bottom][top] = tei1->curves[5];
-                        tet_array[t1]->curve[1][1][top][bottom] = tei1->curves[6];
-                        tet_array[t1]->curve[1][1][bottom][top] = tei1->curves[7];
-
-                        tei1 = tei1->next;
-                }
-
-                ei = ei->next;
+            ei = ei->next;
         }
 
+    orient(manifold);
+    my_free(tet_array);
 
-        orient(manifold);
-        my_free( tet_array );
+    manifold->solution_type[complete] = cf->type;
+    manifold->solution_type[filled] = cf->type;
 
-        manifold->solution_type[complete] = cf->type;
-        manifold->solution_type[filled] = cf->type;
+    if (manifold->solution_type[complete] == geometric_solution)
+        my_tilts(manifold);
+    peripheral_curves_as_needed(manifold);
 
-        if (manifold->solution_type[complete] == geometric_solution )
-                my_tilts( manifold );
-        peripheral_curves_as_needed( manifold );
-
-        return manifold;
+    return manifold;
 }
 
 /* Ported from Organizer::readTriangulation in gui/organizer.cpp. */
@@ -606,13 +594,11 @@ Triangulation * read_casson_format(
     char ** str)
 {
     CassonFormat * cf = read_casson_struct(str);
-    if (cf == NULL)
-    {
+    if (cf == NULL) {
         return NULL;
     }
     Triangulation * t = NULL;
-    if (verify_casson(cf))
-    {
+    if (verify_casson(cf)) {
         t = casson_to_triangulation(cf);
     }
     free_casson_format(cf);

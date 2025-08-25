@@ -616,35 +616,27 @@ write_casson_format_to_stream(
     Boolean include_geometric_structure_and_cusp_indices,
     Boolean include_peripheral_curves)
 {
-        int             index;
-        Tetrahedron     *tet;
-        EdgeClass       *edge;
-        PositionedTet   ptet0,
-                        ptet;
+    Tetrahedron     *tet;
+    int             index;
 
-        for(    tet = manifold->tet_list_begin.next, index = 1;
-                tet!=&manifold->tet_list_end;
-                tet = tet->next, index++ )
-                tet->index = index;
+    for(tet = manifold->tet_list_begin.next, index = 1;
+	tet!=&manifold->tet_list_end;
+	tet = tet->next, index++ )
+	
+	tet->index = index;
 
         if (include_geometric_structure_and_cusp_indices)
         {
                 if (manifold->solution_type[complete] == geometric_solution )
                 {
-                    if (contains_flat_tetrahedra(manifold)==TRUE)
-                    {
+                    if (contains_flat_tetrahedra(manifold) == TRUE)
                         ostream_printf(stream, "SolutionType partially_flat_solution\n");
-                    }
                     else
-                    {
                         ostream_printf(stream, "SolutionType geometric_solution\n");
-                    }
                 }
 
                 if (manifold->solution_type[complete] == nongeometric_solution )
-                {
                     ostream_printf(stream, "SolutionType nongeometric_solution\n");
-                }
 
                 if (manifold->solution_type[complete] == not_attempted )
                     ostream_printf(stream, "SolutionType not_attempted\n");
@@ -670,7 +662,8 @@ write_casson_format_to_stream(
                 ostream_printf(stream, "vertices_known\n\n");
         }
 
-        for (   edge = manifold->edge_list_begin.next, index = 1;
+	EdgeClass * edge;
+        for (edge = manifold->edge_list_begin.next, index = 1;
                 edge!=&manifold->edge_list_end;
                 edge = edge->next, index++)
         {
@@ -678,8 +671,10 @@ write_casson_format_to_stream(
 
             ostream_printf(stream, " %04.3f", edge->singular_order );
 
+	    PositionedTet ptet0;
             set_left_edge(edge,&ptet0);
-            ptet = ptet0;
+	    
+            PositionedTet ptet = ptet0;
 
             if (include_angular_error)
             {
@@ -725,14 +720,16 @@ write_casson_format_to_stream(
         {
                 ostream_printf(stream, "\n");
 
+		EdgeClass * edge;
                 for (   edge = manifold->edge_list_begin.next, index = 1;
                         edge!=&manifold->edge_list_end;
                         edge = edge->next, index++)
                 {
                     ostream_printf(stream, "%3d", index);
 
+		    PositionedTet ptet0;
                         set_left_edge(edge,&ptet0);
-                        ptet = ptet0;
+			PositionedTet ptet = ptet0;
 
                         ostream_printf(stream, " %21.16f", edge->inner_product[ultimate] );
 
@@ -755,16 +752,19 @@ write_casson_format_to_stream(
 
         if (include_geometric_structure_and_cusp_indices && include_peripheral_curves )
         {
-                ostream_printf(stream, "\n");
 
+	    ostream_printf(stream, "\n");
+
+	    EdgeClass *edge;
+	    
                 for (   edge = manifold->edge_list_begin.next, index = 1;
                         edge!=&manifold->edge_list_end;
                         edge = edge->next, index++)
                 {
                     ostream_printf(stream, "%3d", index);
-
+		    PositionedTet ptet0;
                         set_left_edge(edge,&ptet0);
-                        ptet = ptet0;
+                        PositionedTet ptet = ptet0;
 
                         do
                         {

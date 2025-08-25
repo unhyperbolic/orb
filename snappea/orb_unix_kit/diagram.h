@@ -48,21 +48,24 @@ DiagramCrossing * get_next_diagram_crossing(DiagramEdge *e, DiagramCrossing *c);
 DiagramCrossing * get_prev_diagram_crossing(DiagramEdge *e, DiagramCrossing *c);
 
 Graph * diagram_to_graph(Diagram *);
-/* Corresponds to DiagramCanvas::outputTriangulation in interface.cpp */
+/* Corresponds to DiagramCanvas::outputTriangulation in gui/interface.cpp */
 Triangulation * triangulate_diagram_complement(Diagram *, Boolean remove_vertices);
 
+/* Corresponds to EndType in gui/diagram_canvas.h */
 enum DiagramEndType
 {
     diagramBegin = 0,
     diagramEnd
 };
 
+/* Corresponds to EdgeType in gui/diagram_canvas.h */
 enum DiagramEdgeType
 {
     diagramSingular = 0,
     diagramDrilled
 };
 
+/* Corresponds to EndData in gui/diagram_canvas.h */
 struct DiagramEndData
 {
     DiagramEdge *edge;
@@ -71,6 +74,7 @@ struct DiagramEndData
     double angle;
 };
 
+/* Corresponds to Vertex in gui/diagram_canvas.h */
 struct DiagramVertex
 {
     int x, y;
@@ -81,15 +85,7 @@ struct DiagramVertex
     DiagramEndData **incident_end_data;
 };
 
-struct DiagramCrossing
-{
-    int x, y;
-    int crossing_id;
-    int crossing_sign;
-    DiagramEdge *over, *under;
-    double position_on_overstrand, position_on_understrand;
-};
-
+/* Corresponds to Edge in gui/diagram_canvas.h */
 struct DiagramEdge
 {
     DiagramVertex *vertex[2];
@@ -101,6 +97,17 @@ struct DiagramEdge
     DiagramEdgeType edge_type;
 };
 
+/* Corresponds to Crossing in gui/diagram_canvas.h */
+struct DiagramCrossing
+{
+    int x, y;
+    int crossing_id;
+    int crossing_sign;
+    DiagramEdge *over, *under;
+    double position_on_overstrand, position_on_understrand;
+};
+
+/* Corresponds to DiagramCanvas in gui/diagram_canvas.h */
 struct Diagram
 {
     int num_arcs;

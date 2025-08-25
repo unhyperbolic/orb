@@ -11,9 +11,9 @@
 #include <stdio.h>
 #include <ctype.h>
 
-/* What is happening in gui code:
+/* What is happening in the original Orb
 
-   loadOrbSlot (in organizer.cpp):
+   loadOrbSlot (in gui/organizer.cpp):
        * reads the line "% orb"
        * reads the next line for the name (but ignores it)
        - readTriangulation
@@ -26,6 +26,10 @@
     	         * seems to be somewhat similar to the plink format (vertices, edges, crossings)
 		 * EndData, Edge, Vertex, Crossing in diagram_canvas.h
 	         * DiagramCanvas::outputTriangulation creates a Graph
+
+   ManifoldInterface::saveSlot (in gui/manifold_interface.cpp)
+       - Console::saveTriangulation (in gui/console.cpp)
+       - DiagramCanvas::saveDiagram (in gui/interface.cpp)
 
 */
 
@@ -140,7 +144,7 @@ static void write_orb_to_stream(
 	write_casson_format_to_stream(
 	    stream,
 	    trig,
-	    TRUE, TRUE, TRUE);
+	    FALSE, TRUE, TRUE);
     }
 
     if (diagram)
@@ -149,7 +153,7 @@ static void write_orb_to_stream(
 	{
 	    ostream_printf(stream, "\n");
 	}
-	
+
 	write_diagram_to_stream(
 	    stream,
 	    diagram);
@@ -164,6 +168,6 @@ char * write_orb_to_string(
     string_stream_init(&stream);
 
     write_orb_to_stream(&stream, trig, diagram);
-    
+
     return stream.buffer;
 }

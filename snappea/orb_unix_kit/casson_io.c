@@ -651,6 +651,7 @@ Triangulation * read_casson_format(
 
 #define NL(f)   (f==0) ? 'u' : ((f==1) ? 'v' : ((f==2) ? 'w' : 'x'))
 
+/* Ported from Console::saveTriangulation in console.cpp */
 void
 write_casson_format_to_stream(
     OStream * stream,

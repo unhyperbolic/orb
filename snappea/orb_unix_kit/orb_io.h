@@ -5,6 +5,7 @@
 
 #include "SnapPea.h"
 
+/* Corresponds to Organizer::loadOrbSlot in gui/organizer/cpp */
 extern void read_orb_from_string(
     char *file_data,
     Triangulation ** trig,
@@ -15,6 +16,7 @@ extern void read_orb(
     Triangulation ** trig,
     Diagram ** diagram);
 
+/* Corresponds to ManifoldInterface::saveSlot in gui/manifold_interface.cpp */
 char * write_orb_to_string(
     Triangulation *trig,
     Diagram * diagram);

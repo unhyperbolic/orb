@@ -132,6 +132,7 @@ Diagram *read_diagram_from_string(
     return NULL;
 }
 
+/* Ported from DiagramCanvas::saveDiagram in interface.cpp */
 void
 write_diagram_to_stream(
     OStream * stream,

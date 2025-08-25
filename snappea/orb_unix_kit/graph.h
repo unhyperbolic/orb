@@ -10,11 +10,15 @@ extern "C" {
 typedef struct Graph Graph;
 typedef struct GraphMeeting GraphMeeting;
 
+/* Corresponds to triangulate_graph_complement in gui/graph_complement.h */
 Triangulation *triangulate_graph_complement( Graph *gamma, Boolean remove_vertices );
+/* Corresponds to free_graph in gui/graph_complement.c */
 void free_graph( Graph *gamma );
 
+/* Forward declaration from kernel */
 typedef struct Tetrahedron Tetrahedron;
 
+/* Corresponds to Graph in gui/graph_complement.h */
 struct Graph
 {
  	int num_meetings; /* Number of GraphMeetings in the projection */
@@ -26,6 +30,7 @@ struct Graph
  	GraphMeeting *meeting; /* contains all the meetings in the Graph */
 };
 
+/* Corresponds to MeetingType in gui/graph_complement.h */
 typedef int MeetingType;
 enum
 {
@@ -33,6 +38,7 @@ enum
  	Inter = 1
 };
 
+/* Corresponds to GraphMeeting in gui/graph_complement.h */
 struct GraphMeeting
 {
  	/* Cross or Inter */

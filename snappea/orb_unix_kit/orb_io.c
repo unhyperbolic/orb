@@ -2,6 +2,7 @@
 
 #include "casson_io.h"
 #include "diagram_io.h"
+#include "ostream.h"
 
 #include "kernel.h"
 
@@ -63,8 +64,6 @@ void read_orb_from_string(
     }
     size_t name_length = p - name_start;
 
-    printf("casson: %s\n", p);
-    
     *trig = read_casson_format(&p);
 
     if (*trig && name_length > 0)
@@ -91,9 +90,9 @@ void read_orb_from_string(
 }
 
 void read_orb(
-        const char *file_name,
-	Triangulation ** trig,
-	Diagram ** diagram)
+    const char *file_name,
+    Triangulation ** trig,
+    Diagram ** diagram)
 {
     // Follows unit_kit/unix_file_io.c
 
@@ -120,4 +119,51 @@ void read_orb(
     read_orb_from_string(buffer, trig, diagram);
 
     free(buffer);
+}
+
+static void write_orb_to_stream(
+    OStream * stream,
+    Triangulation *trig,
+    Diagram * diagram)
+{
+    ostream_printf(stream, "%% orb\n");
+    if (trig)
+    {
+	if (trig->name)
+	{
+	    ostream_printf(stream, "%s\n", trig->name);
+	}
+	else
+	{
+	    ostream_printf(stream, "untitled\n");
+	}
+	write_casson_format_to_stream(
+	    stream,
+	    trig,
+	    TRUE, TRUE, TRUE);
+    }
+
+    if (diagram)
+    {
+	if (trig)
+	{
+	    ostream_printf(stream, "\n");
+	}
+	
+	write_diagram_to_stream(
+	    stream,
+	    diagram);
+    }
+}
+
+char * write_orb_to_string(
+    Triangulation *trig,
+    Diagram * diagram)
+{
+    OStream stream;
+    string_stream_init(&stream);
+
+    write_orb_to_stream(&stream, trig, diagram);
+    
+    return stream.buffer;
 }

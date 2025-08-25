@@ -22,18 +22,16 @@ int main(int argc, char **argv)
 
     read_orb(argv[1], &trig, &diagram);
 
-    if (trig) {
-        printf("Status: Got trig %s\n", trig->name);
-    }
-
+    printf("=============================\n");
+    printf("%s\n", write_orb_to_string(trig, diagram));
+    printf("=============================\n");
+    
     if (diagram) {
         printf("Status: Got diagram\n");
 	Triangulation * tri = triangulate_diagram_complement(diagram, FALSE);
 	if (tri) {
 	    printf("Triangulation\n%s\n", write_casson_format_to_string(tri, TRUE, TRUE, TRUE));
 	}
-
-	printf("Diagram\n%s\n", write_diagram_to_string(diagram));
     }
 
     printf("Status: got trig\n");

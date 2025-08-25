@@ -132,7 +132,6 @@ Diagram *read_diagram_from_string(
     return NULL;
 }
 
-static
 void
 write_diagram_to_stream(
     OStream * stream,

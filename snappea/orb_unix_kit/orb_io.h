@@ -15,5 +15,9 @@ extern void read_orb(
     Triangulation ** trig,
     Diagram ** diagram);
 
+char * write_orb_to_string(
+    Triangulation *trig,
+    Diagram * diagram);
+
 #endif
 

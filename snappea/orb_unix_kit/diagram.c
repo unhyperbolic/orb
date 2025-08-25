@@ -427,7 +427,7 @@ assign_diagram_crossing_signs(
         Complex z2 = point_position_to_complex(c->over->vertex[diagramEnd]);
         Complex z3 = point_position_to_complex(c->under->vertex[diagramBegin]);
 
-        // w = ( z3 - z1 ) / ( z2 - z1 );
+        /* w = ( z3 - z1 ) / ( z2 - z1 ); */
 	Complex w = complex_div(complex_minus(z3, z1), complex_minus(z2, z1));
 
         c->crossing_sign = ( w.imag > 0 ) ? 1 : -1;

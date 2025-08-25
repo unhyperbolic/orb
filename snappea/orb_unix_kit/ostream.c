@@ -34,7 +34,7 @@ void ostream_printf(OStream *s, const char * format, ...)
         va_start(args, format);
         vfprintf(s->file, format, args);
         va_end(args);
-	return;
+        return;
     }
     
     while (1)

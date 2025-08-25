@@ -23,9 +23,9 @@
             - freeCassonFormat
        - readDiagram
             - DiagramCanvas::readDiagram (in interface.cpp)
-    	         * seems to be somewhat similar to the plink format (vertices, edges, crossings)
-		 * EndData, Edge, Vertex, Crossing in diagram_canvas.h
-	         * DiagramCanvas::outputTriangulation creates a Graph
+                 * seems to be somewhat similar to the plink format (vertices, edges, crossings)
+                 * EndData, Edge, Vertex, Crossing in diagram_canvas.h
+                 * DiagramCanvas::outputTriangulation creates a Graph
 
    ManifoldInterface::saveSlot (in gui/manifold_interface.cpp)
        - Console::saveTriangulation (in gui/console.cpp)
@@ -48,7 +48,7 @@ void read_orb_from_string(
      * Read and ignore the header (% orb).
      */
     while (!is_eol_char(*p)) {
-	p++;
+        p++;
     }
 
     /*
@@ -56,12 +56,12 @@ void read_orb_from_string(
      */
 
     while (is_eol_char(*p) && *p != '\0') {
-	p++;
+        p++;
     }
 
     char * name_start = p;
     while (!is_eol_char(*p)) {
-	p++;
+        p++;
     }
     size_t name_length = p - name_start;
 
@@ -69,20 +69,20 @@ void read_orb_from_string(
 
     if (*trig && name_length > 0)
     {
-	(*trig)->name = (char*) my_malloc(name_length + 1);
-	if ((*trig)->name == NULL)
-	{
-	    // uFatalError
-	    return;
-	}
-	memcpy((*trig)->name, name_start, name_length);
-	(*trig)->name[name_length] = '\0';
+        (*trig)->name = (char*) my_malloc(name_length + 1);
+        if ((*trig)->name == NULL)
+        {
+            /* uFatalError */
+            return;
+        }
+        memcpy((*trig)->name, name_start, name_length);
+        (*trig)->name[name_length] = '\0';
     }
     while (isspace(*p)) {
-	p++;
+        p++;
     }
     if (*p == '\0') {
-	return;
+        return;
     }
 
     *diagram = read_diagram_from_string(p);
@@ -93,7 +93,7 @@ void read_orb(
     Triangulation ** trig,
     Diagram ** diagram)
 {
-    // Follows unit_kit/unix_file_io.c
+    /* Follows unit_kit/unix_file_io.c */
 
     FILE * fp = fopen(file_name, "rb");
     if (fp == NULL) {
@@ -128,26 +128,26 @@ static void write_orb_to_stream(
     ostream_printf(stream, "%% orb\n");
     if (trig)
     {
-	if (trig->name) {
-	    ostream_printf(stream, "%s\n", trig->name);
-	} else {
-	    ostream_printf(stream, "untitled\n");
-	}
-	write_casson_format_to_stream(
-	    stream,
-	    trig,
-	    FALSE, TRUE, TRUE);
+        if (trig->name) {
+            ostream_printf(stream, "%s\n", trig->name);
+        } else {
+            ostream_printf(stream, "untitled\n");
+        }
+        write_casson_format_to_stream(
+            stream,
+            trig,
+            FALSE, TRUE, TRUE);
     }
 
     if (diagram)
     {
-	if (trig) {
-	    ostream_printf(stream, "\n");
-	}
+        if (trig) {
+            ostream_printf(stream, "\n");
+        }
 
-	write_diagram_to_stream(
-	    stream,
-	    diagram);
+        write_diagram_to_stream(
+            stream,
+            diagram);
     }
 }
 

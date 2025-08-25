@@ -22,4 +22,3 @@ char * write_orb_to_string(
     Diagram * diagram);
 
 #endif
-

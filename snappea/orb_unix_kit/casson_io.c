@@ -77,7 +77,7 @@ static SolutionType string_to_solution_type(
             return t;               \
         }
 
-    // Branches similar to line 712...
+    /* Branches similar to line 712... */
     _SOL_TYPE(geometric_solution);
     _SOL_TYPE(nongeometric_solution);
     _SOL_TYPE(flat_solution);
@@ -387,8 +387,6 @@ void free_casson_format(CassonFormat *cf)
 
 /* Ported from cassonToTriangulation in gui/organizer.cpp */
 static Triangulation *casson_to_triangulation(CassonFormat *cf) {
-    // int a1, a2, a3, a4, b1, b2, b3, b4, t1, t2;
-
     Triangulation * manifold = NEW_STRUCT(Triangulation);
     initialize_triangulation(manifold);
 

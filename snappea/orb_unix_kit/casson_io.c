@@ -608,184 +608,207 @@ Triangulation * read_casson_format(
 #define NL(f)   (f==0) ? 'u' : ((f==1) ? 'v' : ((f==2) ? 'w' : 'x'))
 
 /* Ported from Console::saveTriangulation in console.cpp */
-void
-write_casson_format_to_stream(
-    OStream * stream,
-    Triangulation * manifold,
+void write_casson_format_to_stream(
+    OStream *stream,
+    Triangulation *manifold,
     Boolean include_angular_error,
     Boolean include_geometric_structure_and_cusp_indices,
     Boolean include_peripheral_curves)
 {
-    Tetrahedron     *tet;
-    int             index;
+    Tetrahedron *tet;
+    int index;
 
-    for(tet = manifold->tet_list_begin.next, index = 1;
-	tet!=&manifold->tet_list_end;
-	tet = tet->next, index++ )
-	
-	tet->index = index;
+    for (tet = manifold->tet_list_begin.next, index = 1;
+         tet != &manifold->tet_list_end;
+	 tet = tet->next, index++)
+    {
+        tet->index = index;
+    }
+
+    if (include_geometric_structure_and_cusp_indices) {
+        if (manifold->solution_type[complete] == geometric_solution) {
+            if (contains_flat_tetrahedra(manifold) == TRUE)
+                ostream_printf(stream,
+                               "SolutionType partially_flat_solution\n");
+            else
+                ostream_printf(stream, "SolutionType geometric_solution\n");
+        }
+
+        if (manifold->solution_type[complete] == nongeometric_solution)
+            ostream_printf(stream, "SolutionType nongeometric_solution\n");
+
+        if (manifold->solution_type[complete] == not_attempted)
+            ostream_printf(stream, "SolutionType not_attempted\n");
+
+        if (manifold->solution_type[complete] == other_solution)
+            ostream_printf(stream, "SolutionType other_solution\n");
+
+        if (manifold->solution_type[complete] == step_failed)
+            ostream_printf(stream, "SolutionType step_failed\n");
+
+        if (manifold->solution_type[complete] == no_solution)
+            ostream_printf(stream, "SolutionType no_solution\n");
+
+        if (manifold->solution_type[complete] == invalid_solution)
+            ostream_printf(stream, "SolutionType invalid_solution\n");
+
+        if (manifold->solution_type[complete] == degenerate_solution)
+            ostream_printf(stream, "SolutionType degenerate_solution\n");
+
+        if (manifold->solution_type[complete] == flat_solution)
+            ostream_printf(stream, "SolutionType flat_solution\n");
+
+        ostream_printf(stream, "vertices_known\n\n");
+    }
+
+    EdgeClass *edge;
+    for (edge = manifold->edge_list_begin.next, index = 1;
+         edge != &manifold->edge_list_end;
+	 edge = edge->next, index++)
+    {
+        ostream_printf(stream, "%3d %2d", index, edge->singular_index + 1);
+
+        ostream_printf(stream, " %04.3f", edge->singular_order);
+
+        PositionedTet ptet0;
+        set_left_edge(edge, &ptet0);
+
+        PositionedTet ptet = ptet0;
+
+        if (include_angular_error) {
+            double err =
+                (edge->singular_order == 0) ? 0 : TWO_PI / edge->singular_order;
+
+            do {
+                err -= ptet.tet->dihedral_angle
+                           [ultimate]
+                           [edge_between_faces[ptet.near_face][ptet.left_face]];
+
+                veer_left(&ptet);
+            } while (!same_positioned_tet(&ptet, &ptet0));
+
+            ostream_printf(stream, " %21.16f", err);
+        }
 
         if (include_geometric_structure_and_cusp_indices)
-        {
-                if (manifold->solution_type[complete] == geometric_solution )
-                {
-                    if (contains_flat_tetrahedra(manifold) == TRUE)
-                        ostream_printf(stream, "SolutionType partially_flat_solution\n");
-                    else
-                        ostream_printf(stream, "SolutionType geometric_solution\n");
-                }
+	{
+            if (ptet.tet->cusp[remaining_face[ptet.left_face][ptet.near_face]]
+                    ->index > -1)
+                ostream_printf(stream, " %2d",
+                               ptet.tet->cusp[remaining_face[ptet.left_face]
+                                                            [ptet.near_face]]
+                                       ->index +
+                                   1);
+            else
+                ostream_printf(
+                    stream, " %2d",
+                    ptet.tet
+                        ->cusp[remaining_face[ptet.left_face][ptet.near_face]]
+                        ->index);
 
-                if (manifold->solution_type[complete] == nongeometric_solution )
-                    ostream_printf(stream, "SolutionType nongeometric_solution\n");
-
-                if (manifold->solution_type[complete] == not_attempted )
-                    ostream_printf(stream, "SolutionType not_attempted\n");
-
-                if (manifold->solution_type[complete] == other_solution )
-                    ostream_printf(stream, "SolutionType other_solution\n");
-
-                if (manifold->solution_type[complete] == step_failed )
-                    ostream_printf(stream, "SolutionType step_failed\n");
-
-                if (manifold->solution_type[complete] == no_solution )
-                    ostream_printf(stream, "SolutionType no_solution\n");
-
-                if (manifold->solution_type[complete] == invalid_solution )
-                    ostream_printf(stream, "SolutionType invalid_solution\n");
-
-                if (manifold->solution_type[complete] == degenerate_solution )
-                    ostream_printf(stream, "SolutionType degenerate_solution\n");
-
-                if (manifold->solution_type[complete] == flat_solution )
-                    ostream_printf(stream, "SolutionType flat_solution\n");
-
-                ostream_printf(stream, "vertices_known\n\n");
+            if (ptet.tet->cusp[remaining_face[ptet.near_face][ptet.left_face]]
+                    ->index > -1)
+                ostream_printf(stream, " %2d",
+                               ptet.tet->cusp[remaining_face[ptet.near_face]
+                                                            [ptet.left_face]]
+                                       ->index +
+                                   1);
+            else
+                ostream_printf(
+                    stream, " %2d",
+                    ptet.tet
+                        ->cusp[remaining_face[ptet.near_face][ptet.left_face]]
+                        ->index);
         }
 
-	EdgeClass * edge;
+        do
+	{
+            char c = NL(ptet.left_face);
+            char d = NL(ptet.near_face);
+
+            ostream_printf(stream, " %2d%c%c", ptet.tet->index, c, d);
+
+            veer_left(&ptet);
+
+        } while (!same_positioned_tet(&ptet, &ptet0));
+
+        ostream_printf(stream, "\n");
+    }
+
+    if (include_geometric_structure_and_cusp_indices &&
+        manifold->solution_type[complete] != not_attempted)
+    {
+        ostream_printf(stream, "\n");
+
+        EdgeClass *edge;
         for (edge = manifold->edge_list_begin.next, index = 1;
-                edge!=&manifold->edge_list_end;
-                edge = edge->next, index++)
-        {
-            ostream_printf(stream, "%3d %2d", index, edge->singular_index + 1);
+             edge != &manifold->edge_list_end;
+	     edge = edge->next, index++)
+	{
+            ostream_printf(stream, "%3d", index);
 
-            ostream_printf(stream, " %04.3f", edge->singular_order );
-
-	    PositionedTet ptet0;
-            set_left_edge(edge,&ptet0);
-	    
+            PositionedTet ptet0;
+            set_left_edge(edge, &ptet0);
             PositionedTet ptet = ptet0;
 
-            if (include_angular_error)
-            {
-                        double err =  (edge->singular_order==0)
-                                ? 0
-                                : TWO_PI / edge->singular_order;
+            ostream_printf(stream, " %21.16f", edge->inner_product[ultimate]);
 
-                        do{
-                                err -= ptet.tet->dihedral_angle[ultimate]
-                                                [edge_between_faces[ptet.near_face][ptet.left_face]];
+            int top = remaining_face[ptet.left_face][ptet.near_face];
+            ostream_printf(stream, " %21.16f",
+                           ptet.tet->cusp[top]->inner_product[ultimate]);
 
-                                veer_left(&ptet);
-                        }while (!same_positioned_tet(&ptet, &ptet0));
+            int bottom = remaining_face[ptet.near_face][ptet.left_face];
+            ostream_printf(stream, " %21.16f",
+                           ptet.tet->cusp[bottom]->inner_product[ultimate]);
 
-                        ostream_printf(stream, " %21.16f", err );
-                }
+            do {
+                ostream_printf(
+                    stream, " %21.16f",
+                    ptet.tet->dihedral_angle
+                        [ultimate]
+                        [edge_between_faces[ptet.near_face][ptet.left_face]]);
+                veer_left(&ptet);
+            } while (!same_positioned_tet(&ptet, &ptet0));
 
-            if (include_geometric_structure_and_cusp_indices)
-                {
-                        if (ptet.tet->cusp[remaining_face[ptet.left_face][ptet.near_face]]->index > -1 )
-                                ostream_printf(stream, " %2d", ptet.tet->cusp[remaining_face[ptet.left_face][ptet.near_face]]->index + 1 );
-                        else    ostream_printf(stream, " %2d", ptet.tet->cusp[remaining_face[ptet.left_face][ptet.near_face]]->index );
-
-                        if (ptet.tet->cusp[remaining_face[ptet.near_face][ptet.left_face]]->index > -1 )
-                                ostream_printf(stream, " %2d", ptet.tet->cusp[remaining_face[ptet.near_face][ptet.left_face]]->index + 1 );
-                        else    ostream_printf(stream, " %2d", ptet.tet->cusp[remaining_face[ptet.near_face][ptet.left_face]]->index );
-                }
-
-                do{
-                        char c = NL(ptet.left_face);
-                        char d = NL(ptet.near_face);
-
-                        ostream_printf(stream, " %2d%c%c",ptet.tet->index,c,d);
-
-                        veer_left(&ptet);
-
-                }while (!same_positioned_tet(&ptet, &ptet0));
-
-                ostream_printf(stream, "\n");
+            ostream_printf(stream, "\n");
         }
+    }
 
-        if (include_geometric_structure_and_cusp_indices && manifold->solution_type[complete] != not_attempted )
-        {
-                ostream_printf(stream, "\n");
+    if (include_geometric_structure_and_cusp_indices &&
+        include_peripheral_curves)
+    {
+        ostream_printf(stream, "\n");
 
-		EdgeClass * edge;
-                for (   edge = manifold->edge_list_begin.next, index = 1;
-                        edge!=&manifold->edge_list_end;
-                        edge = edge->next, index++)
-                {
-                    ostream_printf(stream, "%3d", index);
+        EdgeClass *edge;
 
-		    PositionedTet ptet0;
-                        set_left_edge(edge,&ptet0);
-			PositionedTet ptet = ptet0;
+        for (edge = manifold->edge_list_begin.next, index = 1;
+             edge != &manifold->edge_list_end;
+	     edge = edge->next, index++)
+	{
+            ostream_printf(stream, "%3d", index);
+            PositionedTet ptet0;
+            set_left_edge(edge, &ptet0);
+            PositionedTet ptet = ptet0;
 
-                        ostream_printf(stream, " %21.16f", edge->inner_product[ultimate] );
+            do {
+                int top = remaining_face[ptet.left_face][ptet.near_face];
+                int bottom = remaining_face[ptet.near_face][ptet.left_face];
 
-                        int top = remaining_face[ptet.left_face][ptet.near_face];
-                        ostream_printf(stream, " %21.16f", ptet.tet->cusp[top]->inner_product[ultimate] );
+                ostream_printf(stream, "   %2d %2d %2d %2d %2d %2d %2d %2d",
+                               ptet.tet->curve[0][0][top][bottom],
+                               ptet.tet->curve[0][0][bottom][top],
+                               ptet.tet->curve[0][1][top][bottom],
+                               ptet.tet->curve[0][1][bottom][top],
+                               ptet.tet->curve[1][0][top][bottom],
+                               ptet.tet->curve[1][0][bottom][top],
+                               ptet.tet->curve[1][1][top][bottom],
+                               ptet.tet->curve[1][1][bottom][top]);
+                veer_left(&ptet);
+            } while (!same_positioned_tet(&ptet, &ptet0));
 
-                        int bottom = remaining_face[ptet.near_face][ptet.left_face];
-                        ostream_printf(stream, " %21.16f", ptet.tet->cusp[bottom]->inner_product[ultimate] );
-
-                        do
-                        {
-                                ostream_printf(stream, " %21.16f", ptet.tet->dihedral_angle[ultimate]
-                                                [edge_between_faces[ptet.near_face][ptet.left_face]]);
-                                veer_left(&ptet);
-                        }while (!same_positioned_tet(&ptet, &ptet0));
-
-                        ostream_printf(stream, "\n");
-                }
+            ostream_printf(stream, "\n");
         }
-
-        if (include_geometric_structure_and_cusp_indices && include_peripheral_curves )
-        {
-
-	    ostream_printf(stream, "\n");
-
-	    EdgeClass *edge;
-	    
-                for (   edge = manifold->edge_list_begin.next, index = 1;
-                        edge!=&manifold->edge_list_end;
-                        edge = edge->next, index++)
-                {
-                    ostream_printf(stream, "%3d", index);
-		    PositionedTet ptet0;
-                        set_left_edge(edge,&ptet0);
-                        PositionedTet ptet = ptet0;
-
-                        do
-                        {
-                                int top = remaining_face[ptet.left_face][ptet.near_face];
-                                int bottom = remaining_face[ptet.near_face][ptet.left_face];
-
-                                ostream_printf(stream, "   %2d %2d %2d %2d %2d %2d %2d %2d",
-                                        ptet.tet->curve[0][0][top][bottom],
-                                        ptet.tet->curve[0][0][bottom][top],
-                                        ptet.tet->curve[0][1][top][bottom],
-                                        ptet.tet->curve[0][1][bottom][top],
-                                        ptet.tet->curve[1][0][top][bottom],
-                                        ptet.tet->curve[1][0][bottom][top],
-                                        ptet.tet->curve[1][1][top][bottom],
-                                        ptet.tet->curve[1][1][bottom][top] );
-                                veer_left(&ptet);
-                        }while (!same_positioned_tet(&ptet, &ptet0));
-
-                        ostream_printf(stream, "\n");
-                }
-        }
+    }
 }
 
 char *

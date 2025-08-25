@@ -38,17 +38,16 @@ static Boolean is_eol_char(char c){
 }
 
 void read_orb_from_string(
-        char *str,
-        Triangulation ** trig,
-	Diagram ** diagram)
+    char *str,
+    Triangulation ** trig,
+    Diagram ** diagram)
 {
     char * p = str;
 
     /*
      * Read and ignore the header (% orb).
      */
-    while (!is_eol_char(*p))
-    {
+    while (!is_eol_char(*p)) {
 	p++;
     }
 
@@ -56,14 +55,12 @@ void read_orb_from_string(
      * Find first non-empty line.
      */
 
-    while (is_eol_char(*p) && *p != '\0')
-    {
+    while (is_eol_char(*p) && *p != '\0') {
 	p++;
     }
 
     char * name_start = p;
-    while (!is_eol_char(*p))
-    {
+    while (!is_eol_char(*p)) {
 	p++;
     }
     size_t name_length = p - name_start;
@@ -81,12 +78,10 @@ void read_orb_from_string(
 	memcpy((*trig)->name, name_start, name_length);
 	(*trig)->name[name_length] = '\0';
     }
-    while (isspace(*p))
-    {
+    while (isspace(*p)) {
 	p++;
     }
-    if (*p == '\0')
-    {
+    if (*p == '\0') {
 	return;
     }
 
@@ -133,12 +128,9 @@ static void write_orb_to_stream(
     ostream_printf(stream, "%% orb\n");
     if (trig)
     {
-	if (trig->name)
-	{
+	if (trig->name) {
 	    ostream_printf(stream, "%s\n", trig->name);
-	}
-	else
-	{
+	} else {
 	    ostream_printf(stream, "untitled\n");
 	}
 	write_casson_format_to_stream(
@@ -149,8 +141,7 @@ static void write_orb_to_stream(
 
     if (diagram)
     {
-	if (trig)
-	{
+	if (trig) {
 	    ostream_printf(stream, "\n");
 	}
 

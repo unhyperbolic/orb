@@ -5,7 +5,7 @@
 
 #include "SnapPea.h"
 
-/* Corresponds to Organizer::loadOrbSlot in gui/organizer/cpp */
+/* Corresponds to Organizer::loadOrbSlot in gui/organizer.cpp */
 extern void read_orb_from_string(
     char *file_data,
     Triangulation ** trig,

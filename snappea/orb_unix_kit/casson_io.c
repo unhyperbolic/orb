@@ -315,90 +315,65 @@ static CassonFormat *read_casson_struct(
 }
 
 /* corresponds verify_casson_format in gui/organizer.cpp */
-static Boolean verify_casson(
-    CassonFormat *cf)
+static Boolean verify_casson(CassonFormat *cf)
 {
     if (cf == NULL) {
-	return FALSE;
+        return FALSE;
     }
 
-    Boolean         check[4][4];
-    EdgeInfo        *ei;
-    TetEdgeInfo     *tei;
+    for (int i = 0; i < cf->num_tet; i++) {
+	Boolean check[4][4];
+        for (int j = 0; j < 4; j++) {
+            for (int k = 0; k < 4; k++) {
+		check[j][k] = j == k;
 
+                EdgeInfo * ei = cf->head;
 
-    for (int i = 0; i < cf->num_tet; i++)
-    {
-	for (int j = 0; j < 4; j++)
-	{
-	    for (int k = 0; k < 4; k++)
-	    {
-		if (j == k)
-		{
-		    check[j][k] = TRUE;
-		}
-		else
-		{
-		    check[j][k] = FALSE;
-		}
+                if (ei == NULL) return FALSE;
 
-                ei = cf->head;
+                while (ei != NULL) {
+                    TetEdgeInfo * tei = ei->head;
 
-                if (ei == NULL)
-                        return FALSE;
+                    if (tei == NULL) return FALSE;
 
-                while(ei!=NULL)
-                {
-                        tei = ei->head;
+                    while (tei != NULL) {
+                        if (tei->tet_index == i) {
+                            if (check[tei->f1][tei->f2]) return TRUE;
 
-                        if (tei == NULL)
-                                return FALSE;
-
-                        while(tei!=NULL)
-                        {
-                                if (tei->tet_index == i )
-                                {
-                                        if (check[tei->f1][tei->f2])
-                                                return TRUE;
-
-                                        check[tei->f1][tei->f2] = TRUE;
-                                        check[tei->f2][tei->f1] = TRUE;
-                                }
-                                tei = tei->next;
+                            check[tei->f1][tei->f2] = TRUE;
+                            check[tei->f2][tei->f1] = TRUE;
                         }
-                        ei = ei->next;
+                        tei = tei->next;
+                    }
+                    ei = ei->next;
                 }
 
-                for(j=0;j<4;j++)
-                        for(k=0;k<4;k++)
-                        if (check[j][k]==FALSE)
-                                return FALSE;
+                for (int j = 0; j < 4; j++)
+                    for (int k = 0; k < 4; k++)
+                        if (check[j][k] == FALSE) return FALSE;
+            }
         }
-	}
     }
 
-        return TRUE;
+    return TRUE;
 }
 
 /* Ported from freeCassonFormat in gui/organizer.cpp. */
 void free_casson_format(CassonFormat *cf)
 {
-    EdgeInfo *e1, *e2;
-    TetEdgeInfo *t1, *t2;
-
     if (cf == NULL)
         return;
 
-    e1 = cf->head;
+    EdgeInfo * e1 = cf->head;
 
-    while (e1!=NULL)
+    while (e1 != NULL)
     {
-        e2 = e1->next;
-        t1 = e1->head;
+        EdgeInfo * e2 = e1->next;
+        TetEdgeInfo * t1 = e1->head;
 
-        while (t1!=NULL)
+        while (t1 != NULL)
         {
-            t2 = t1->next;
+            TetEdgeInfo * t2 = t1->next;
             my_free(t1);
             t1 = t2;
         }

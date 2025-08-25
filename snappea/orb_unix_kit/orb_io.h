@@ -1,3 +1,15 @@
+/**
+ * orb_io.h
+ *
+ * Functions to read and write the orb file format used by
+ * Damian Heard's original orb.
+ *
+ * It simply concatenates:
+ * - The header: % orb
+ * - The triangulation in a Casson-like format, see casson_io.h
+ * - If given, the planar diagram of the knotted graph, see diagram_io.h
+ */
+
 #ifndef _orb_io_
 #define _orb_io_
 

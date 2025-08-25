@@ -1,3 +1,17 @@
+/**
+ * diagram.h
+ *
+ * Data structures (prefixed by Diagram) to encode a knotted graph as
+ * planar diagram with crossings (generalizes a knot diagram).
+ *
+ * Functions to convert a Diagram to a Graph and triangulate the complement.
+ *
+ * A Diagram has an embedding into the plane and its edges can cross.
+ * The conversion to Graph turns each crossing into a four-valent vertex
+ * results in a fat graph.
+ *
+ */
+
 #ifndef _diagram_
 #define _diagram_
 

@@ -1,3 +1,11 @@
+/**
+ * diagram_io.h
+ *
+ * Functions for reading and writing a Diagram in a format
+ * similar to the link projection format.
+ *
+ */
+
 #ifndef _diagram_io_
 #define _diagram_io_
 

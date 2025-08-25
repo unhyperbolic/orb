@@ -36,7 +36,7 @@ void ostream_printf(OStream *s, const char * format, ...)
         va_end(args);
         return;
     }
-    
+
     while (1)
     {
         if (s->buffer == NULL)

@@ -52,13 +52,13 @@ struct GraphMeeting
                    strands labeled 2.  If strand i is labelled infinity then label[i] is set to 1 */
 
     Boolean visited;
-    
+
     Tetrahedron **tet; /* At a crossing there are four tetrahedra, one in each crossing.  The ith
                           tetrahedron lies above the ith strand.  At an intersection the number of
                           tetrahedra is two time the number of strandsi, j - two tetrahdra per sector.
                           The ith tetrahedron lies above the ith strand (i<j) and is in the same sector
                           as the i+j mod 2j tetrahedron. (Confused?  Sorry.) */
-    
+
     int *neighbor;  /* Following strand i out the the meeting takes you to the meeting indexed neighbor[i] */
 };
 

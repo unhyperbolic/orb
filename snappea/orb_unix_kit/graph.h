@@ -40,7 +40,7 @@ struct GraphMeeting
     MeetingType type; /* Cross or Inter */
 
     int num_strands; /* Number of strands leaving the meeting.
-			For a crossing the number is always four*/
+                        For a crossing the number is always four*/
 
     int handedness; /* This variable is used to help calculate the handedness of crossings */
 
@@ -49,15 +49,15 @@ struct GraphMeeting
     int *component; /* component[i] is the component strand i belongs to */
 
     int *label; /* label[i] is the label on strand i.  For example a pillowcase cusp may have four
-		   strands labeled 2.  If strand i is labelled infinity then label[i] is set to 1 */
+                   strands labeled 2.  If strand i is labelled infinity then label[i] is set to 1 */
 
     Boolean visited;
     
     Tetrahedron **tet; /* At a crossing there are four tetrahedra, one in each crossing.  The ith
-			  tetrahedron lies above the ith strand.  At an intersection the number of
-			  tetrahedra is two time the number of strandsi, j - two tetrahdra per sector.
-			  The ith tetrahedron lies above the ith strand (i<j) and is in the same sector
-			  as the i+j mod 2j tetrahedron. (Confused?  Sorry.) */
+                          tetrahedron lies above the ith strand.  At an intersection the number of
+                          tetrahedra is two time the number of strandsi, j - two tetrahdra per sector.
+                          The ith tetrahedron lies above the ith strand (i<j) and is in the same sector
+                          as the i+j mod 2j tetrahedron. (Confused?  Sorry.) */
     
     int *neighbor;  /* Following strand i out the the meeting takes you to the meeting indexed neighbor[i] */
 };
